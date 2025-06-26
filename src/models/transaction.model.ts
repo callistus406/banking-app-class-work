@@ -1,16 +1,28 @@
-import Mongoose , { Schema } from "mongoose";
+import Mongoose, { Schema } from "mongoose";
 
-const Transactionschema = new Schema({
-  id: {type: String, required: true, unique: true},
-  amount: {type: Number, required: true},
-  sender: {type: String, required: true},
-  receiver: {type: String, required: true},
-  status: {
-    type: String,
-    enum: ["pending", "completed", "failed"],
-    default: "pending",
+const enum TransactionStatus {
+  PENDING = "PENDING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
+}
+const Transactionschema = new Schema(
+  {
+    amount: { type: Number, required: true },
+    senders_account: { type: String, required: true },
+    recievers_account: { type: String, required: true },
+    tx_ref: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ["PENDING", "COMPLETED", "FAILED"],
+      default: TransactionStatus.PENDING,
+    },
   },
-  timestamp: {type: Date, default: Date.now},
-});
+  {
+    timestamps: true,
+  }
+);
 
-export const transactionModel = Mongoose.model("Transaction", Transactionschema);
+export const transactionModel = Mongoose.model(
+  "Transaction",
+  Transactionschema
+);

@@ -3,6 +3,7 @@ import express, { Response } from "express";
 import { logger } from "./middleware/logger.middleware";
 import { mongoConnection } from "./config/db.connection";
 import { handleCustomError } from "./middleware/errorHandler.midleware";
+import router from "./routes";
 // import dotenv from "dotenv";
 // dotenv.config();
 const app = express();
@@ -13,7 +14,7 @@ app.use(express.json());
 
 app.use(logger);
 
-// app.use(router);
+app.use(router);
 app.use(handleCustomError);
 
 //database call
