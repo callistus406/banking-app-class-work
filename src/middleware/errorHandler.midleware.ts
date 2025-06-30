@@ -30,7 +30,7 @@ export const handleCustomError = (
 } else {
     res.status(500).json({
         success: false,
-        payload: "Something went wrong!",
+        payload: "Something went wrong2!",
         timeStamp: new Date(),
     });
   }
