@@ -5,9 +5,10 @@ import { userModel } from "../models/user.model";
 export class UserRepository {
   //createUser
 
-  static async createUser(user: IRegister) {
+  static async createUser(user: IRegister,is_verified:boolean) {
     const response = await userModel.create({
       ...user,
+      is_veified:is_verified
     });
 
     return response;
@@ -39,5 +40,14 @@ export class UserRepository {
   static async login(email: string, password: string): Promise<any> {
     const user = await userModel.findOne({ email, password });
     return user
+  }
+
+    static async deleteUserByuId(userId: Types.ObjectId) {
+    const response = await userModel.deleteOne({
+      _id: userId,
+    });
+    if (!response) return null;
+
+    return response;
   }
 }
