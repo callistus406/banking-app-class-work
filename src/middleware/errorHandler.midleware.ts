@@ -28,9 +28,12 @@ export const handleCustomError = (
       timeStamp: new Date(),
     });
 } else {
+
+  console.log(error);
+  
     res.status(500).json({
         success: false,
-        payload: "Something went wrong2!",
+        payload: "Something went wrong!",
         timeStamp: new Date(),
     });
   }
