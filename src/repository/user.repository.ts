@@ -35,4 +35,9 @@ export class UserRepository {
     if (!response) return null;
     return response;
   }
+
+  static async login(email: string, password: string): Promise<any> {
+    const user = await userModel.findOne({ email, password });
+    return user
+  }
 }

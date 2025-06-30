@@ -22,11 +22,6 @@ const userSchema = new Schema(
       type: String,
       require: true,
     },
-    phone_number: {
-      type: String,
-      require: true,
-      unique: true,
-    },
     address: {
       street: String,
       city: String,
