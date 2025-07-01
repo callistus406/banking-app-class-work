@@ -1,4 +1,6 @@
 import * as crypto from "crypto";
+import jwt from "jsonwebtoken";
+import { JWT_SECRETf } from "../config/system.variable";
 import { UserRepository } from "../repository/user.repository";
 import { IPreRegister, IRegister } from "../@types/user";
 import bcrypt from "bcrypt";
@@ -103,15 +105,54 @@ export class UserService {
     const user = await UserRepository.findUserByEmail(email);
     if (!user) throw throwCustomError("Please register to continue", 400);
 
-    // check password
+    if (!user.is_veified) {
+      throw throwCustomError("Please verify your email before logging in", 400);
+    }
+      
+
+    // check passwor
     const hashedPassword = await bcrypt.compare(
       password,
       user.password as string
     );
-    if (!hashedPassword == !password)
+    if (!hashedPassword)
       throw throwCustomError("Invalid credentials", 400);
 
-    return user;
+     const otp = UserService.generateOtp();
+
+      sendMail(
+      {
+        email: email,
+        subject: "there a Loggin made on your account, if this is not you, please contact support Team on support@example.com ",
+         otp: otp.toString(),
+        name: `${user.last_name} ${user.first_name}`,
+      },
+      otpTemplate 
+    );
+
+    const payload = {
+      username: user.first_name,
+      email: user.email,
+    };
+
+    console.log(JWT_SECRETf);
+
+    let jwttoken = jwt.sign(payload, JWT_SECRETf as string, {
+      expiresIn: "5m",
+    });
+    console.log(jwttoken);
+
+    return (
+      {
+        message: "Login successful",
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        authkey: jwttoken,
+      }
+    );
+
+    
 
   }
 }
