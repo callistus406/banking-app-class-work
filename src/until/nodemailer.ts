@@ -10,8 +10,8 @@ let configOptions = {
 };
 
 export const sendMail = async (
-  data: { email: string; subject: string; name: string; otp: string },
-  cb: (name: string, otp: string) => string
+  data: { email: string; subject: string; emailInfo:any },
+  cb: Function
 ) => {
   try {
     const sender = "callistus455@gmail.com";
@@ -30,7 +30,7 @@ export const sendMail = async (
       from: sender,
       to: data.email,
       subject: data.subject,
-      html: cb(data.name, data.otp),
+      html: cb(data),
     };
 
     await transporter.sendMail(message);

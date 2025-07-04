@@ -14,12 +14,3 @@ export const otpTemplate = (name: string, otp: string) => {
 
 
 
-// class methods
-
-// instance methods / object methods
-
-// UserSerivce.generateOtp
-
-
-// const obj = new UserSerivce()
-// obj.generateOtp

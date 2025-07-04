@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 import { IRegister } from "../@types/user";
 import { userModel } from "../models/user.model";
+import { OTPModel } from "../models/otp.model";
 
 export class UserRepository {
   //createUser
@@ -49,5 +50,13 @@ export class UserRepository {
     if (!response) return null;
 
     return response;
+  }
+
+  static async findOtpBymail(email:string,otp:string){
+    const response = await OTPModel.findOne({email,otp})
+
+    if(!response) return null
+
+    return response
   }
 }

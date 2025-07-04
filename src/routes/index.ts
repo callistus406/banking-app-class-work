@@ -1,5 +1,5 @@
 import express from "express";
-import { UserController } from "../controller/user.controller";
+import { AuthController } from "../controller/auth.controller";
 import { validator } from "../middleware/validator.middleware";
 import { preSchema , registerschema } from "../validation/user-schema";
 //import { authMiddleware } from "../middleware/auth.middleware";
@@ -7,8 +7,10 @@ import { preSchema , registerschema } from "../validation/user-schema";
 
 const router = express.Router();
 
-router.post("/pre-register",validator(preSchema) ,UserController.presignUp);
-router.post("/register", validator(registerschema), UserController.register);
- router.get("/login", UserController.login);
+router.post("/pre-register",validator(preSchema) ,AuthController.presignUp);
+router.post("/register", validator(registerschema), AuthController.register);
+ router.post("/login", AuthController.login);
+ router.post("/request-password-rest", AuthController.requestPasswordReset);
+ router.post("/verify-otp", AuthController.validateOtp);
 
 export default router;
