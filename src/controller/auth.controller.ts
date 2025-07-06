@@ -51,4 +51,17 @@ export class AuthController {
 
     res.status(200).json({ success: true, payload: response });
   });
+
+  static resetPassword = asyncWrapper(
+    async (req: Request, res: Response) => {
+      const { otp, newPassword, confirmPassword } = req.body;
+
+      const response = await UserService.resetPassword(
+        otp,
+        newPassword,
+        confirmPassword
+      );
+
+      res.status(200).json({ success: true, payload: response });
+    });
 }

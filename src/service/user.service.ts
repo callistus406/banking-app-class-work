@@ -1,5 +1,6 @@
 import * as crypto from "crypto";
-import jwt from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
+//import jwt from "jsonwebtoken";
 import { JWT_EXP, JWT_SECRET } from "../config/system.variable";
 import { UserRepository } from "../repository/user.repository";
 import { IPreRegister, IRegister } from "../@types/user";
@@ -10,6 +11,7 @@ import { sendMail } from "../until/nodemailer";
 import { otpTemplate } from "../until/otp-template";
 import { confirmationTemplate } from "../until/login-confirmation-template";
 import { OTPModel } from "../models/otp.model";
+import { userModel } from "../models/user.model";
 export class UserService {
   static async preRegister(user: IPreRegister) {
     // find if user exists
@@ -138,17 +140,52 @@ export class UserService {
 
     let jwttoken = jwt.sign(payload, JWT_SECRET, {
       expiresIn: JWT_EXP,
-    }) as any;
+    } as any);
+
+    if (!jwttoken) throw throwCustomError("Unable to login", 500);
 
     sendMail(
       {
-        message: "Login successful",
-        firstname: user.first_name,
-        lastname: user.last_name,
-        email: user.email,
-        otp: otp,
-        authkey: jwttoken,
-      }
+        email: email,
+        subject: "Login Confirmation",
+        emailInfo: {
+          ipAddress: ipAddress,
+          userAgent: userAgent,
+          name: `${user.last_name} ${user.first_name}`,
+        },
+      },
+      confirmationTemplate
+    );
+    return {
+      message: "Login successful",
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+      authkey: jwttoken,
+    };
+  }
+
+  static async requestPasswordReset(email: string) {
+    const user = await UserRepository.findUserByEmail(email);
+
+    if (!user) throw throwCustomError("Invalid account", 400);
+
+    if (!user.is_veified) throw throwCustomError("Unverified account", 401);
+
+    //create otp
+    const otp = await UserService.generateOtp(email);
+    // send otp via mail
+
+    sendMail(
+      {
+        email: email,
+        subject: "OTP VERIFICATIION",
+        emailInfo: {
+          otp: otp.toString(),
+          name: `${user.last_name} ${user.first_name}`,
+        },
+      },
+      otpTemplate
     );
 
     return "An email has been sent to you inbox";
@@ -168,4 +205,24 @@ export class UserService {
     return  "Otp verified"
 
   } 
+  
+  static async resetPassword(otp: number, newPassword: string, confirmPassword: string) {
+    if (newPassword !== confirmPassword) {
+      throw throwCustomError("Passwords do not match", 400);
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    if (!hashedPassword) throw throwCustomError("Unable to reset password", 500);
+
+   const user = await UserRepository.findOneAndUpdate(
+    { otp},
+    { password: hashedPassword, otp: null },
+    { new: true } // Return the updated user
+  ) ;
+
+   if (!user) throw throwCustomError("Invalid OTP", 400);
+
+    return "Password reset successfully";
+  } 
+
+  
 }
