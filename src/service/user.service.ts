@@ -110,13 +110,23 @@ export class UserService {
     }
       
 
-    // check passwor
+    // check password
+    if (!user.password) throw throwCustomError("Invalid credentials1", 400);
+
+    if (!password) throw throwCustomError("Invalid credentials2", 400);
+
+    if (!user.password === !password)
+      throw throwCustomError("Invalid credentials2", 400);
+
+
+    // compare password
+
     const hashedPassword = await bcrypt.compare(
       password,
       user.password as string
     );
     if (!hashedPassword)
-      throw throwCustomError("Invalid credentials", 400);
+      throw throwCustomError("Invalid credentials4", 400);
 
      const otp = UserService.generateOtp();
 
@@ -145,9 +155,10 @@ export class UserService {
     return (
       {
         message: "Login successful",
-        first_name: user.first_name,
-        last_name: user.last_name,
+        firstname: user.first_name,
+        lastname: user.last_name,
         email: user.email,
+        otp: otp,
         authkey: jwttoken,
       }
     );
