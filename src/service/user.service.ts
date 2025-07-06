@@ -122,41 +122,12 @@ export class UserService {
     }
 
     // check password
-<<<<<<< HEAD
-    if (!user.password) throw throwCustomError("Invalid credentials1", 400);
-
-    if (!password) throw throwCustomError("Invalid credentials2", 400);
-
-    if (!user.password === !password)
-      throw throwCustomError("Invalid credentials2", 400);
-
-
-    // compare password
-
-=======
->>>>>>> 20e1bd3aeba4ef707822b8e43e5b6499d86bdf88
     const hashedPassword = await bcrypt.compare(
       password,
       user.password as string
     );
     if (!hashedPassword)
-<<<<<<< HEAD
-      throw throwCustomError("Invalid credentials4", 400);
-
-     const otp = UserService.generateOtp();
-
-      sendMail(
-      {
-        email: email,
-        subject: "there a Loggin made on your account, if this is not you, please contact support Team on support@example.com ",
-         otp: otp.toString(),
-        name: `${user.last_name} ${user.first_name}`,
-      },
-      otpTemplate 
-    );
-=======
       throw throwCustomError("Invalid email or password", 400);
->>>>>>> 20e1bd3aeba4ef707822b8e43e5b6499d86bdf88
 
     const payload = {
       username: user.first_name,
@@ -171,7 +142,6 @@ export class UserService {
 
     sendMail(
       {
-<<<<<<< HEAD
         message: "Login successful",
         firstname: user.first_name,
         lastname: user.last_name,
@@ -179,48 +149,6 @@ export class UserService {
         otp: otp,
         authkey: jwttoken,
       }
-=======
-        email: email,
-        subject: "Login Confirmation",
-        emailInfo: {
-          ipAddress: ipAddress,
-          userAgent: userAgent,
-          name: `${user.last_name} ${user.first_name}`,
-        },
-      },
-      confirmationTemplate
-    );
-    return {
-      message: "Login successful",
-      first_name: user.first_name,
-      last_name: user.last_name,
-      email: user.email,
-      authkey: jwttoken,
-    };
-  }
-
-  static async requestPasswordReset(email: string) {
-    const user = await UserRepository.findUserByEmail(email);
-
-    if (!user) throw throwCustomError("Invalid account", 400);
-
-    if (!user.is_veified) throw throwCustomError("Unverified account", 401);
-
-    //create otp
-    const otp = await UserService.generateOtp(email);
-    // send otp via mail
-
-    sendMail(
-      {
-        email: email,
-        subject: "OTP VERIFICATIION",
-        emailInfo: {
-          otp: otp.toString(),
-          name: `${user.last_name} ${user.first_name}`,
-        },
-      },
-      otpTemplate
->>>>>>> 20e1bd3aeba4ef707822b8e43e5b6499d86bdf88
     );
 
     return "An email has been sent to you inbox";
