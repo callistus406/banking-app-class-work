@@ -60,14 +60,14 @@ export class UserRepository {
     return response
   }
 
-  static async resetpassword(otp:number, newPassword: string, confirmPassword: string){
-      // const response = await userModel.findOne({otp});
-      // if (!response) return null;
-      const response  = await userModel.findOneAndUpdate(
-        { otp },
-        { password: newPassword, otp: null },
-        { new: true }
-      );
+  static async resetpassword(otp:number) {
+      const response = await userModel.findOne({otp});
+      if (!response) return null;
+      // const response  = await userModel.findOneAndUpdate(
+      //   { otp },
+      //   { password: newPassword, otp: null },
+      //   { new: true }
+      // );
 
       return response;
     }

@@ -54,10 +54,11 @@ export class AuthController {
 
   static resetPassword = asyncWrapper(
     async (req: Request, res: Response) => {
-      const { otp, newPassword, confirmPassword } = req.body;
+      const { otp } = req.params;
+      const {newPassword, confirmPassword } = req.body;
 
       const response = await UserService.resetPassword(
-        otp,
+        otp as any,
         newPassword,
         confirmPassword
       );

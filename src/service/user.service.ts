@@ -191,38 +191,34 @@ export class UserService {
     return "An email has been sent to you inbox";
   }
 
-  static async validateOtp(email:string,otp:string){
-  const user = await UserRepository.findUserByEmail(email);
+  static async validateOtp(email: string, otp: string) {
+    const user = await UserRepository.findUserByEmail(email);
 
     if (!user) throw throwCustomError("Invalid account", 400);
 
     if (!user.is_veified) throw throwCustomError("Unverified account", 401);
 
-    const isValid = await UserRepository.findOtpBymail(email,otp)
+    const isValid = await UserRepository.findOtpBymail(email, otp);
     if (!isValid) throw throwCustomError("Invalid Otp", 400);
 
+    return "Otp verified";
+  }
 
-    return  "Otp verified"
-
-  } 
-  
-  static async resetPassword(otp: number, newPassword: string, confirmPassword: string) {
+  static async resetPassword(
+    otp: number,
+    newPassword: string,
+    confirmPassword: string
+  ) {
     if (newPassword !== confirmPassword) {
       throw throwCustomError("Passwords do not match", 400);
     }
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    if (!hashedPassword) throw throwCustomError("Unable to reset password", 500);
 
-   const user = await UserRepository.findOneAndUpdate(
-    { otp},
-    { password: hashedPassword, otp: null },
-    { new: true } // Return the updated user
-  ) ;
+    const user = await UserRepository.resetpassword(otp);
 
-   if (!user) throw throwCustomError("Invalid OTP", 400);
+    if (!user) throw throwCustomError("Invalid OTP", 400);
+    user.password = await bcrypt.hash(newPassword, 10);
+    const updatedUser = await user.save();
 
     return "Password reset successfully";
-  } 
-
-  
+  }
 }
