@@ -53,10 +53,22 @@ export class UserRepository {
   }
 
   static async findOtpBymail(email:string,otp:string){
-    const response = await OTPModel.findOne({email,otp})
+    const response = await OTPModel.findOne({otp})
 
     if(!response) return null
 
     return response
   }
+
+  static async resetpassword(otp:number) {
+      const response = await userModel.findOne({otp});
+      if (!response) return null;
+      // const response  = await userModel.findOneAndUpdate(
+      //   { otp },
+      //   { password: newPassword, otp: null },
+      //   { new: true }
+      // );
+
+      return response;
+    }
 }

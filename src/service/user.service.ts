@@ -1,5 +1,6 @@
 import * as crypto from "crypto";
-import jwt from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
+//import jwt from "jsonwebtoken";
 import { JWT_EXP, JWT_SECRET } from "../config/system.variable";
 import { UserRepository } from "../repository/user.repository";
 import { IPreRegister, IRegister } from "../@types/user";
@@ -10,6 +11,7 @@ import { sendMail } from "../until/nodemailer";
 import { otpTemplate } from "../until/otp-template";
 import { confirmationTemplate } from "../until/login-confirmation-template";
 import { OTPModel } from "../models/otp.model";
+import { userModel } from "../models/user.model";
 export class UserService {
   static async preRegister(user: IPreRegister) {
     // find if user exists
@@ -138,7 +140,9 @@ export class UserService {
 
     let jwttoken = jwt.sign(payload, JWT_SECRET, {
       expiresIn: JWT_EXP,
-    }) as any;
+    } as any);
+
+    if (!jwttoken) throw throwCustomError("Unable to login", 500);
 
     sendMail(
       {
@@ -187,18 +191,34 @@ export class UserService {
     return "An email has been sent to you inbox";
   }
 
-  static async validateOtp(email:string,otp:string){
-  const user = await UserRepository.findUserByEmail(email);
+  static async validateOtp(email: string, otp: string) {
+    const user = await UserRepository.findUserByEmail(email);
 
     if (!user) throw throwCustomError("Invalid account", 400);
 
     if (!user.is_veified) throw throwCustomError("Unverified account", 401);
 
-    const isValid = await UserRepository.findOtpBymail(email,otp)
+    const isValid = await UserRepository.findOtpBymail(email, otp);
     if (!isValid) throw throwCustomError("Invalid Otp", 400);
 
+    return "Otp verified";
+  }
 
-    return  "Otp verified"
+  static async resetPassword(
+    otp: number,
+    newPassword: string,
+    confirmPassword: string
+  ) {
+    if (newPassword !== confirmPassword) {
+      throw throwCustomError("Passwords do not match", 400);
+    }
 
-  } 
+    const user = await UserRepository.resetpassword(otp);
+
+    if (!user) throw throwCustomError("Invalid OTP", 400);
+    user.password = await bcrypt.hash(newPassword, 10);
+    const updatedUser = await user.save();
+
+    return "Password reset successfully";
+  }
 }

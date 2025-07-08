@@ -12,5 +12,6 @@ router.post("/register", validator(registerschema), AuthController.register);
  router.post("/login", AuthController.login);
  router.post("/request-password-rest", AuthController.requestPasswordReset);
  router.post("/verify-otp", AuthController.validateOtp);
+router.post("/reset-password", AuthController.resetPassword);
 
 export default router;

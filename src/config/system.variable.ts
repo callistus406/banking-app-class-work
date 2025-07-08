@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { JWT_SECRETE } from './system-variables';
+//import { JWT_SECRETE } from './system-variables';
 
 dotenv.config();
 
