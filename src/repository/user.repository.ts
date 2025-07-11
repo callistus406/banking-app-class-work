@@ -27,6 +27,12 @@ export class UserRepository {
     return response;
   }
   
+  static async findUserProfile(id: Types.ObjectId) {
+    const response = await userModel.findById(id).select("-password -isVerified  -__v -_id");
+    if (!response) return null;
+    return response;
+  }
+  
 //   static async findUserByEmailOrPhone(email: string) {
 //     const response = await userModel.findOne({ email });
 //     if (!response) return null;
@@ -53,7 +59,7 @@ export class UserRepository {
   }
 
   static async findOtpBymail(email:string,otp:string){
-    const response = await OTPModel.findOne({otp})
+    const response = await OTPModel.findOne({email,otp})
 
     if(!response) return null
 

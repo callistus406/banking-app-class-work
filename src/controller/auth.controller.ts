@@ -2,6 +2,7 @@ import { asyncWrapper } from "../middleware/asyncWrapper";
 import { Request, Response } from "express";
 import { IPreRegister } from "../@types/user";
 import { UserService } from "../service/user.service";
+import { invalidTokens, IRequest } from "../middleware/auth.middleware";
 
 export class AuthController {
   static presignUp = asyncWrapper(async (req: Request, res: Response) => {
@@ -52,17 +53,30 @@ export class AuthController {
     res.status(200).json({ success: true, payload: response });
   });
 
-  static resetPassword = asyncWrapper(
-    async (req: Request, res: Response) => {
-      const { otp } = req.params;
-      const {newPassword, confirmPassword } = req.body;
+  static resetPassword = asyncWrapper(async (req: Request, res: Response) => {
+    const { newPassword, confirmPassword, otp, email } = req.body;
 
-      const response = await UserService.resetPassword(
-        otp as any,
-        newPassword,
-        confirmPassword
-      );
-
-      res.status(200).json({ success: true, payload: response });
+    const response = await UserService.resetPassword({
+      email,
+      newPassword,
+      otp,
+      confirmPassword,
     });
+
+    res.status(200).json({ success: true, payload: response });
+  });
+
+  static getProfile = asyncWrapper(async (req: IRequest, res: Response) => {
+    const response = await UserService.fetchProfile(req.user.id);
+
+    res.status(200).json({ success: true, payload: response });
+  });
+
+  static logout = asyncWrapper(async (req: IRequest, res: Response) => {
+    const token = req.headers.authorization?.split("Bearer ")[1] as string ;
+
+    invalidTokens.push(token);
+
+    res.status(200).json({ success: true, payload: "Logout successful" });
+  });
 }
