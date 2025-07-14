@@ -3,6 +3,7 @@ import { AuthController } from "../controller/auth.controller";
 import { validator } from "../middleware/validator.middleware";
 import { preSchema, registerschema } from "../validation/user-schema";
 import { authMiddleware } from "../middleware/auth.middleware";
+import { WalletController } from "../controller/wallet.controller";
 //import { authMiddleware } from "../middleware/auth.middleware";
 
 const router = express.Router();
@@ -15,6 +16,9 @@ router.post("/verify-otp", AuthController.validateOtp);
 router.post("/reset-password/:otp", AuthController.resetPassword);
 router.get("/profile", authMiddleware as any, AuthController.getProfile);
 router.post("/logout", authMiddleware as any, AuthController.logout);
+router.get("/wallet/:accountNumber", authMiddleware as any, WalletController.getWalletByAccountNumber);
+router.get("/wallets", authMiddleware as any, WalletController.getWallets);
+router.post("/wallets", authMiddleware as any, WalletController.updateWalletPin);
 
 export default router;
 

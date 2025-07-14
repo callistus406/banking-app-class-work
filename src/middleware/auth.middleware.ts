@@ -5,7 +5,11 @@ import { userModel } from "../models/user.model";
 import { Types } from "mongoose";
 
 export interface IRequest extends Request {
-  user: any;
+  user: {
+    id:Types.ObjectId,
+    firstName?:string | null,
+    email?:string | null
+  };
 }
 
 export const invalidTokens:string[] = []
