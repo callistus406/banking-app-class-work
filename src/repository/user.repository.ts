@@ -27,11 +27,6 @@ export class UserRepository {
     return response;
   }
   
-//   static async findUserByEmailOrPhone(email: string) {
-//     const response = await userModel.findOne({ email });
-//     if (!response) return null;
-//     return response;
-//   }
   static async findUserByPhoneNumber(phoneNumber: string) {
     const response = await userModel.findOne({ phone_number: phoneNumber });
     if (!response) return null;
