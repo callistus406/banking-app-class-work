@@ -12,8 +12,25 @@ import { otpTemplate } from "../until/otp-template";
 import { confirmationTemplate } from "../until/login-confirmation-template";
 import { OTPModel } from "../models/otp.model";
 import { userModel } from "../models/user.model";
+import {
+  emailSchema,
+  preSchema,
+  registerschema,
+  validateOtp,
+  validateResetPassword,
+} from "../validation/user-schema";
+import { accountInfoTemplate } from "../until/wallet-template";
+import { Types } from "mongoose";
 export class UserService {
   static async preRegister(user: IPreRegister) {
+    //validations
+
+    const { error } = preSchema.validate(user);
+
+    if (error) {
+      throw throwCustomError(error.message, 422);
+    }
+
     // find if user exists
     const isFound = await UserRepository.findUserByEmail(user.email);
 
@@ -40,6 +57,12 @@ export class UserService {
   }
 
   static async register(user: IRegister) {
+    const { error } = registerschema.validate(user);
+
+    if (error) {
+      throw throwCustomError(error.message, 422);
+    }
+
     // find if user exists
     const isFound = await UserRepository.findUserByEmail(user.email);
     if (isFound)
@@ -48,7 +71,7 @@ export class UserService {
     //   password checkAdd commentMore actions
     const hashedPassword = await bcrypt.hash(user.password, 10);
 
-    if (!hashedPassword) throw throwCustomError("Some thing went wrong", 500);
+    if (!hashedPassword) throw throwCustomError("Something went wrong", 500);
 
     // create account
     const account = await UserRepository.createUser(
@@ -58,11 +81,8 @@ export class UserService {
 
     if (!account) throw throwCustomError("Unable to complete signup", 500);
 
-    //generate account number
-
     const accountNumber = await UserService.genUniqeAccountNumber();
     if (accountNumber) {
-      // create wallet
       const wallet = await WalletRepository.createWallet({
         userId: account._id,
         acccountNumber: accountNumber,
@@ -71,6 +91,20 @@ export class UserService {
         await UserRepository.deleteUserByuId(account._id);
       }
     }
+
+    sendMail(
+      {
+        email: user.email,
+        subject: "WALLET CONFIRMATION",
+        emailInfo: {
+          customerName: `${user.last_name} ${user.first_name}`,
+          accountName: `${user.last_name} ${user.first_name}`,
+          accountNumber: accountNumber,
+          name: `${user.last_name} ${user.first_name}`,
+        },
+      },
+      accountInfoTemplate
+    );
 
     return "Account created successfully";
     //send a response
@@ -132,8 +166,7 @@ export class UserService {
       throw throwCustomError("Invalid email or password", 400);
 
     const payload = {
-      username: user.first_name,
-      email: user.email,
+      userId: user._id,
     };
 
     console.log(JWT_SECRET);
@@ -166,6 +199,12 @@ export class UserService {
   }
 
   static async requestPasswordReset(email: string) {
+    //validate email27017
+
+    const { error, value } = emailSchema.validate({ email });
+
+    if (error) throw throwCustomError(error.message, 422);
+
     const user = await UserRepository.findUserByEmail(email);
 
     if (!user) throw throwCustomError("Invalid account", 400);
@@ -192,6 +231,13 @@ export class UserService {
   }
 
   static async validateOtp(email: string, otp: string) {
+    const { error } = validateOtp.validate({ email, otp });
+
+    if (error) {
+      throw throwCustomError(error.message, 422);
+    }
+
+    if (isNaN(parseInt(otp))) throw throwCustomError("Otp must digits", 422);
     const user = await UserRepository.findUserByEmail(email);
 
     if (!user) throw throwCustomError("Invalid account", 400);
@@ -204,21 +250,42 @@ export class UserService {
     return "Otp verified";
   }
 
-  static async resetPassword(
-    otp: number,
-    newPassword: string,
-    confirmPassword: string
-  ) {
-    if (newPassword !== confirmPassword) {
-      throw throwCustomError("Passwords do not match", 400);
+  static async resetPassword(data: {
+    email: string;
+    otp: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) {
+    const { email, otp, newPassword, confirmPassword } = data;
+
+    const { error } = validateResetPassword.validate(data);
+    if (error) {
+      throw throwCustomError(error.message, 422);
     }
 
-    const user = await UserRepository.resetpassword(otp);
+    const user = await UserRepository.findUserByEmail(email);
 
-    if (!user) throw throwCustomError("Invalid OTP", 400);
+    if (!user) throw throwCustomError("Invalid account", 400);
+
+    const isValid = await UserRepository.findOtpBymail(email, otp);
+    if (!isValid) throw throwCustomError("Invalid Otp", 400);
+
+    if (newPassword.trim() !== confirmPassword.trim()) {
+      throw throwCustomError("Passwords do not match", 400);
+    }
     user.password = await bcrypt.hash(newPassword, 10);
-    const updatedUser = await user.save();
+    await user.save();
 
     return "Password reset successfully";
   }
+
+  //=====================================|| User MGT ||============================
+
+  static fetchProfile = async (id: Types.ObjectId) => {
+    const profile = await UserRepository.findUserProfile(id);
+    if (!profile) {
+      throw throwCustomError("User not found", 422);
+    }
+    return profile
+  };
 }
