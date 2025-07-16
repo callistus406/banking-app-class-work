@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { ObjectId, Types } from "mongoose";
 import { IRegister } from "../@types/user";
 import { userModel } from "../models/user.model";
 import { OTPModel } from "../models/otp.model";
@@ -58,6 +58,13 @@ export class UserRepository {
     if(!response) return null
 
     return response
+  }
+
+  static async findUserProfile(id: Types.ObjectId){
+    const response = await userModel.findById(id)
+
+    return response;
+
   }
 
   static async resetpassword(otp:number) {

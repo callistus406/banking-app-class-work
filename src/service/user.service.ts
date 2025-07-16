@@ -91,7 +91,7 @@ export class UserService {
         await UserRepository.deleteUserByuId(account._id);
       }
     }
-
+ 
     sendMail(
       {
         email: user.email,
@@ -103,7 +103,7 @@ export class UserService {
           name: `${user.last_name} ${user.first_name}`,
         },
       },
-      accountInfoTemplate
+      accountInfoTemplate 
     );
 
     return "Account created successfully";
