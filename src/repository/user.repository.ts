@@ -85,8 +85,8 @@ export class UserRepository {
        if (!path || typeof path !== 'string') {
     throw new Error('A valid image path is required.');
   }
-      const response = await UploadModel.create({ 
-        Path: path
+      const response = await UploadModel.create({
+        filePath: path
       });
 
       return response;

@@ -4,6 +4,7 @@ import { validator } from "../middleware/validator.middleware";
 import { preSchema, registerschema } from "../validation/user-schema";
 import { authMiddleware } from "../middleware/auth.middleware";
 import { WalletController } from "../controller/wallet.controller";
+import { upload } from "../config/multer.config";
 //import { authMiddleware } from "../middleware/auth.middleware";
 
 const router = express.Router();
@@ -19,7 +20,7 @@ router.post("/logout", authMiddleware as any, AuthController.logout);
 router.get("/wallet/:accountNumber", authMiddleware as any, WalletController.getWalletByAccountNumber as any);
 router.get("/wallets", authMiddleware as any, WalletController.getWallets as any);
 router.post("/wallets", authMiddleware as any, WalletController.updateWalletPin as any);
-router.post("/upload", AuthController.uploadProfile as any);
+router.post("/upload", upload.single("file"), AuthController.uploadProfile as any);
 
 export default router;
 
