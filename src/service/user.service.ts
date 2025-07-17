@@ -289,6 +289,20 @@ export class UserService {
     return profile
   };
 
+  static async updateProfile(id: Types.ObjectId, user: any) {
+    const { error } = registerschema.validate(user);
+
+    if (error) {
+      throw throwCustomError(error.message, 422);
+    }
+
+    const response = await UserRepository.updateProfile(id, user);
+
+    if (!response) throw throwCustomError("Unable to update profile", 500);
+
+    return response;
+  }   
+
   static async uploadProfile(path: string) {
 
   const domain = `http://localhost:4000/${path}`;

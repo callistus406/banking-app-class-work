@@ -72,6 +72,17 @@ export class AuthController {
     res.status(200).json({ success: true, payload: response });
   });
 
+  static updateProfile = asyncWrapper(async (req: IRequest, res: Response) => {
+    const {id, user} = req.body;
+  
+    if (!id) {
+      return res.status(400).json({ success: false, message: "User ID is required" });
+    }
+    const response = await UserService.updateProfile(id, user);
+
+    res.status(200).json({ success: true, payload: response });
+  });
+
   static logout = asyncWrapper(async (req: IRequest, res: Response) => {
     const token = req.headers.authorization?.split("Bearer ")[1] as string;
 

@@ -16,6 +16,7 @@ router.post("/request-password-reset", AuthController.requestPasswordReset);
 router.post("/verify-otp", AuthController.validateOtp);
 router.post("/reset-password/:otp", AuthController.resetPassword);
 router.patch("/profile", authMiddleware as any, AuthController.getProfile);
+router.post("/update-profile", AuthController.updateProfile);
 router.post("/logout", authMiddleware as any, AuthController.logout);
 router.get("/wallet/:accountNumber", authMiddleware as any, WalletController.getWalletByAccountNumber as any);
 router.get("/wallets", authMiddleware as any, WalletController.getWallets as any);
