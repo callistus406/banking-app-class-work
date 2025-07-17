@@ -16,11 +16,13 @@ import {
   emailSchema,
   preSchema,
   registerschema,
+  validateKyc,
   validateOtp,
   validateResetPassword,
 } from "../validation/user-schema";
 import { accountInfoTemplate } from "../until/wallet-template";
 import { Types } from "mongoose";
+import { kycRecords } from "../until/kyc-records";
 export class UserService {
   static async preRegister(user: IPreRegister) {
     //validations
@@ -286,7 +288,49 @@ export class UserService {
     if (!profile) {
       throw throwCustomError("User not found", 422);
     }
-    return profile
+    return profile;
+  };
+
+  //=========================================|| KYC SECTION ||==================================
+
+  static verifyKyc = async (data: {
+    nin: string;
+    bvn: string;
+    userId: Types.ObjectId;
+  }) => {
+    const { nin, bvn, userId } = data;
+    //check if user has  alread  done kyc
+
+    const user = await UserRepository.findUserById(data.userId);
+
+    if (!user) throw throwCustomError("User not found", 404);
+
+    if (user.kycStatus === "APPROVED")
+      throw throwCustomError("You have already completed your kyc", 400);
+
+    const { error } = validateKyc.validate({ nin, bvn });
+
+    if (error) throw throwCustomError(error.message, 422);
+
+    //call external api
+
+    const result = kycRecords.find((item) => item.nin === nin);
+
+
+
+    if (!result) throw throwCustomError("NIN match not found", 404);
+
+    const result2 = kycRecords.find((item) => item.bvn === bvn);
+
+    if (!result2) throw throwCustomError("BVN match not found", 404);
+
+    //kyc should be approved
+
+    const res = await UserRepository.saveKyc({ nin, bvn, userId });
+
+    if (!res) throw throwCustomError("Unable to Verify KYC", 500);
+
+    return "Your KYC has been approved";
   };
 
   static async updateProfile(id: Types.ObjectId, user: any) {

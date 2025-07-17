@@ -30,7 +30,7 @@ export const sendMail = async (
       from: sender,
       to: data.email,
       subject: data.subject,
-      html: cb(data),
+      html: cb(data.emailInfo),
     };
 
     await transporter.sendMail(message);

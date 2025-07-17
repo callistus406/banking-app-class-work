@@ -1,4 +1,4 @@
-export const accountInfoTemplate = (customerName: string, accountName: string, accountNumber: string) => {
+export const accountInfoTemplate = (data:{customerName: string, accountName: string, accountNumber: string}) => {
   return `
     <html>
       <head>
@@ -30,11 +30,11 @@ export const accountInfoTemplate = (customerName: string, accountName: string, a
       </head>
       <body>
         <div class="container">
-          <h2 class="heading">Hello, ${customerName}</h2>
+          <h2 class="heading">Hello, ${data.customerName}</h2>
           <p>Here are your account details:</p>
           <div class="info">
-            <p><span class="label">Account Name:</span> ${accountName}</p>
-            <p><span class="label">Account Number:</span> ${accountNumber}</p>
+            <p><span class="label">Account Name:</span> ${data.accountName}</p>
+            <p><span class="label">Account Number:</span> ${data.accountNumber}</p>
           </div>
           <p>If you have any questions or need assistance, feel free to contact our support team.</p>
           <p>Best regards,<br />The Support Team</p>

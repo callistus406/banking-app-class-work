@@ -1,4 +1,4 @@
-export const otpTemplate = (name: string, otp: string) => {
+export const otpTemplate = (data:{name: string, otp: string}) => {
   return `
     <html>
       <head>
@@ -25,9 +25,9 @@ export const otpTemplate = (name: string, otp: string) => {
       </head>
       <body>
         <div class="container">
-          <h2>Hello, ${name}</h2>
+          <h2>Hello, ${data.name}</h2>
           <p>Your One-Time Password (OTP) is:</p>
-          <p class="otp">${otp}</p>
+          <p class="otp">${data.otp}</p>
           <p>Please use this OTP to complete your action. It will expire shortly for your security.</p>
         </div>
       </body>

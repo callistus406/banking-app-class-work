@@ -18,10 +18,11 @@ router.post("/reset-password/:otp", AuthController.resetPassword);
 router.patch("/profile", authMiddleware as any, AuthController.getProfile);
 router.post("/update-profile", AuthController.updateProfile);
 router.post("/logout", authMiddleware as any, AuthController.logout);
-router.get("/wallet/:accountNumber", authMiddleware as any, WalletController.getWalletByAccountNumber as any);
+router.get("/wallets/:accountNumber", authMiddleware as any, WalletController.getWalletByAccountNumber as any);
 router.get("/wallets", authMiddleware as any, WalletController.getWallets as any);
-router.post("/wallets", authMiddleware as any, WalletController.updateWalletPin as any);
-router.post("/upload", upload.single("file"), AuthController.uploadProfile as any);
+router.patch("/wallets", authMiddleware as any, WalletController.updateWalletPin as any);
+router.post("/upload", upload.single("file") as any, AuthController.uploadProfile as any);
+router.post("/kyc", authMiddleware as any, AuthController.bvnNinVerification)
 
 export default router;
 

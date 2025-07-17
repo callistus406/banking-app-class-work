@@ -3,6 +3,10 @@ import { Request, Response } from "express";
 import { IPreRegister } from "../@types/user";
 import { UserService } from "../service/user.service";
 import { invalidTokens, IRequest } from "../middleware/auth.middleware";
+import { validateKyc } from "../validation/user-schema";
+import { throwCustomError } from "../middleware/errorHandler.midleware";
+import { kycRecords } from "../until/kyc-records";
+import { UserRepository } from "../repository/user.repository";
 
 export class AuthController {
   static presignUp = asyncWrapper(async (req: Request, res: Response) => {
@@ -90,6 +94,19 @@ export class AuthController {
 
     res.status(200).json({ success: true, payload: "Logout successful" });
   });
+
+  //=========================================|| KYC SECTION ||==================================
+
+  static bvnNinVerification = asyncWrapper(
+    async (req: IRequest, res: Response) => {
+      const { bvn, nin } = req.body;
+      const userId = req.user.id;
+
+      const response = await UserService.verifyKyc({ nin, bvn, userId });
+
+      res.status(200).json({ success: true, payload: response });
+    }
+  );
 
   static async uploadProfile(req:Request, res: Response) {
    const path = req.file?.path;

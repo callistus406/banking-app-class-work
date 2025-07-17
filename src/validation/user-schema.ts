@@ -39,5 +39,12 @@ export const validateResetPassword = Joi.object({
 
 });
 
+export const validateKyc = Joi.object({
+  nin: Joi.string().length(11).required(),
+  bvn: Joi.string().length(11).required(),
+
+
+});
+
 
  

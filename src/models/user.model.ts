@@ -1,10 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
-
-
 const userSchema = new Schema(
   {
-  
     first_name: { type: String, require: true },
     last_name: { type: String, require: true },
     password: { type: String, require: true },
@@ -33,7 +30,21 @@ const userSchema = new Schema(
     },
     occupation: { type: String },
     picture: { type: String },
+    kycStatus: {
+      type: String,
+      default:"PENDING"
+    },
+    
+    nin: {
+      type: String,
+    },
+    bvn: {
+      type: String,
+    },
+
+    
   },
+
   {
     timestamps: true,
   }
