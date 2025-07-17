@@ -4,6 +4,7 @@ import { validator } from "../middleware/validator.middleware";
 import { preSchema, registerschema } from "../validation/user-schema";
 import { authMiddleware } from "../middleware/auth.middleware";
 import { WalletController } from "../controller/wallet.controller";
+import { upload } from "../config/multer.config";
 //import { authMiddleware } from "../middleware/auth.middleware";
 
 const router = express.Router();
@@ -14,11 +15,13 @@ router.post("/login", AuthController.login);
 router.post("/request-password-reset", AuthController.requestPasswordReset);
 router.post("/verify-otp", AuthController.validateOtp);
 router.post("/reset-password/:otp", AuthController.resetPassword);
-router.get("/profile", authMiddleware as any, AuthController.getProfile);
+router.patch("/profile", authMiddleware as any, AuthController.getProfile);
+router.post("/update-profile", AuthController.updateProfile);
 router.post("/logout", authMiddleware as any, AuthController.logout);
-router.get("/wallet/:accountNumber", authMiddleware as any, WalletController.getWalletByAccountNumber);
-router.get("/wallets", authMiddleware as any, WalletController.getWallets);
-router.post("/wallets", authMiddleware as any, WalletController.updateWalletPin);
+router.get("/wallet/:accountNumber", authMiddleware as any, WalletController.getWalletByAccountNumber as any);
+router.get("/wallets", authMiddleware as any, WalletController.getWallets as any);
+router.post("/wallets", authMiddleware as any, WalletController.updateWalletPin as any);
+router.post("/upload", upload.single("file"), AuthController.uploadProfile as any);
 
 export default router;
 
