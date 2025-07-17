@@ -73,10 +73,25 @@ export class AuthController {
   });
 
   static logout = asyncWrapper(async (req: IRequest, res: Response) => {
-    const token = req.headers.authorization?.split("Bearer ")[1] as string ;
+    const token = req.headers.authorization?.split("Bearer ")[1] as string;
 
     invalidTokens.push(token);
 
     res.status(200).json({ success: true, payload: "Logout successful" });
   });
+
+  static async uploadProfile(req: IRequest, res: Response) {
+   const path = req.file?.path;
+    console.log("File path:", path);
+
+    if (!path) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No file uploaded" });
+    }
+
+    const response = await UserService.uploadProfile(path);
+
+    res.status(200).json({ success: true, payload: response });
+  }
 }

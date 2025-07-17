@@ -288,4 +288,16 @@ export class UserService {
     }
     return profile
   };
+
+  static async uploadProfile(path: string) {
+
+  const domain = `http://localhost:4000/${path}`;
+
+  const profile = await UserRepository.UploadProfileImage(domain);
+  
+  if (!profile) {
+    throw throwCustomError("Unable to update profile", 500);
+  }
+
+  }
 }

@@ -2,6 +2,8 @@ import { ObjectId, Types } from "mongoose";
 import { IRegister } from "../@types/user";
 import { userModel } from "../models/user.model";
 import { OTPModel } from "../models/otp.model";
+import { UploadModel, uploadSchema } from "../models/upload.model";
+import { upload } from "../config/multer.config";
 
 export class UserRepository {
   //createUser
@@ -75,6 +77,17 @@ export class UserRepository {
       //   { password: newPassword, otp: null },
       //   { new: true }
       // );
+
+      return response;
+    }
+
+    static async UploadProfileImage(path: string) {
+       if (!path || typeof path !== 'string') {
+    throw new Error('A valid image path is required.');
+  }
+      const response = await UploadModel.create({ 
+        Path: path
+      });
 
       return response;
     }

@@ -16,11 +16,12 @@ router.post("/verify-otp", AuthController.validateOtp);
 router.post("/reset-password/:otp", AuthController.resetPassword);
 router.patch("/profile", authMiddleware as any, AuthController.getProfile);
 router.post("/logout", authMiddleware as any, AuthController.logout);
-router.get("/wallet/:accountNumber", authMiddleware as any, WalletController.getWalletByAccountNumber);
-router.get("/wallets", authMiddleware as any, WalletController.getWallets);
-router.post("/wallets", authMiddleware as any, WalletController.updateWalletPin);
+router.get("/wallet/:accountNumber", authMiddleware as any, WalletController.getWalletByAccountNumber as any);
+router.get("/wallets", authMiddleware as any, WalletController.getWallets as any);
+router.post("/wallets", authMiddleware as any, WalletController.updateWalletPin as any);
+router.post("/upload", AuthController.uploadProfile as any);
 
-export default router;``
+export default router;
 
 // ppk_live_27e0d8da7ed5818911944f70
 // secrete
