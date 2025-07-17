@@ -14,13 +14,13 @@ router.post("/login", AuthController.login);
 router.post("/request-password-reset", AuthController.requestPasswordReset);
 router.post("/verify-otp", AuthController.validateOtp);
 router.post("/reset-password/:otp", AuthController.resetPassword);
-router.get("/profile", authMiddleware as any, AuthController.getProfile);
+router.patch("/profile", authMiddleware as any, AuthController.getProfile);
 router.post("/logout", authMiddleware as any, AuthController.logout);
 router.get("/wallet/:accountNumber", authMiddleware as any, WalletController.getWalletByAccountNumber);
 router.get("/wallets", authMiddleware as any, WalletController.getWallets);
 router.post("/wallets", authMiddleware as any, WalletController.updateWalletPin);
 
-export default router;
+export default router;``
 
 // ppk_live_27e0d8da7ed5818911944f70
 // secrete
