@@ -7,10 +7,11 @@ import { IRequest } from "../middleware/auth.middleware";
 export class WalletController {
   static getWalletByAccountNumber = asyncWrapper(
     async (req: IRequest, res: Response) => {
-      const { accountNumber } = req.body;
+      const { accountNumber } = req.params;
       const response = await WalletService.getWalletByAccountNumber(
         accountNumber
       );
+
 
       res.status(200).json({
         success: true,
@@ -43,4 +44,27 @@ export class WalletController {
       });
     }
   );
+
+  static transferMoney = asyncWrapper(
+    async (req: IRequest, res: Response) => {
+      const { pin, amount,description,accountNumber } = req.body;
+
+      const userId = req.user.id;
+      const response = await WalletService.transferMoney(userId, {
+        pin,
+        description,
+        accountNumber,
+        amount
+      });
+
+      res.status(200).json({
+        success: true,
+        payload: response,
+      });
+    }
+  );
+
+
+
+
 }

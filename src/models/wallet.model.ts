@@ -1,4 +1,8 @@
 import mongoose, { Schema, Types } from "mongoose";
+import { userModel } from "./user.model";
+
+
+// console.log(userModel.name);
 
 const walletSchema = new Schema(
   {
@@ -6,7 +10,7 @@ const walletSchema = new Schema(
       type: Types.ObjectId,
       required: true,
       unique: true,
-      ref: "User",
+      ref: userModel.name,
     },
     account_number: { type: String, required: true, unique: true },
     balance: { type: Types.Decimal128, default: 0 },

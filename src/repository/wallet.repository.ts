@@ -13,6 +13,13 @@ export class WalletRepository {
     return response;
   }
 
+  static async getWalletByUserId(userId:Types.ObjectId) {
+    const response = await walletModel.findOne({user_id:userId});
+    if (!response) return null;
+
+    return response;
+  }
+
   static async findAccountNumber(accountNumber: string) {
     const response = await walletModel
       .findOne({
@@ -24,7 +31,14 @@ export class WalletRepository {
       });
     if (!response) return null;
 
-    return response;
+    // return response
+
+    return {
+      accountNumber: response.account_number,
+      name: `${(response.user_id as any).first_name} ${
+        (response.user_id as any).first_name
+      }`,
+    };
   }
 
   static async updatePin(userId: Types.ObjectId, pin: string) {
@@ -41,7 +55,7 @@ export class WalletRepository {
 
   static async getWallets() {
     const response = await walletModel
-      .find()
+      .find({})
       .select("account_number")
       .populate({
         path: "user_id",
@@ -54,9 +68,37 @@ export class WalletRepository {
         name: `${(item.user_id as any).first_name} ${
           (item.user_id as any).first_name
         }`,
-        status: item.status
+        status: item.status,
       };
     });
     return mapped;
   }
+
+  static async debitAccount(accountNumber: string, amount: number) {
+    const response = await walletModel.findOneAndUpdate(
+      { account_number: accountNumber },
+     {
+        $inc: { balance: -amount },
+      }
+    );
+    if (!response) {
+      return null;
+    }
+    return response;
+  }
+
+  static async creditAccount(accountNumber: string, amount: number) {
+    const response = await walletModel.findOneAndUpdate(
+      { account_number: accountNumber },
+      {
+        $inc: { balance: amount },
+      }
+    );
+    if (!response) {
+      return null;
+    }
+    return response;
+  }
+
+  
 }
