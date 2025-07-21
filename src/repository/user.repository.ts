@@ -71,15 +71,11 @@ export class UserRepository {
   }
 
 
-
-
   static async updateProfile(id: Types.ObjectId, user: any) {
     const response = await userModel.findByIdAndUpdate(id, user, { new: true });
     if (!response) return null;
     return response;
   }
-
- 
 
 
 
