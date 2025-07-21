@@ -55,7 +55,7 @@ export class UserService {
       otpTemplate
     );
 
-    return "An email has been sent to you inbox";
+    return "An email has been sent to your inbox";
   }
 
   static async register(user: IRegister) {
@@ -294,11 +294,14 @@ export class UserService {
   //=========================================|| KYC SECTION ||==================================
 
   static verifyKyc = async (data: {
+    first_name: string;
+    last_name: string;
+    dateOfBirth: string;
     nin: string;
     bvn: string;
     userId: Types.ObjectId;
   }) => {
-    const { nin, bvn, userId } = data;
+    const { first_name, last_name, dateOfBirth, nin, bvn, userId } = data;
     //check if user has  alread  done kyc
 
     const user = await UserRepository.findUserById(data.userId);
@@ -308,17 +311,39 @@ export class UserService {
     if (user.kycStatus === "APPROVED")
       throw throwCustomError("You have already completed your kyc", 400);
 
-    const { error } = validateKyc.validate({ nin, bvn });
+    const { error } = validateKyc.validate({
+      first_name,
+      last_name,
+      dateOfBirth,
+      nin,
+      bvn,
+    });
 
     if (error) throw throwCustomError(error.message, 422);
 
     //call external api
+    const isUser = kycRecords.find(
+      (user) => user.first_name === first_name && user.last_name === last_name
+    );
+    if (!isUser) throw throwCustomError("invalid user", 422);
 
-    const result = kycRecords.find((item) => item.nin === nin);
+    const isDob = kycRecords.find((x) => x.dateOfBirth === dateOfBirth);
+    if (!isDob) throw throwCustomError("Invalid credentials", 422);
 
+    const result = kycRecords.find(
+      (item) =>
+        item.nin === nin &&
+        item.first_name === first_name &&
+        item.last_name === last_name
+    );
     if (!result) throw throwCustomError("NIN match not found", 404);
 
-    const result2 = kycRecords.find((item) => item.bvn === bvn);
+    const result2 = kycRecords.find(
+      (item) =>
+        item.bvn === bvn &&
+        item.first_name === first_name &&
+        item.last_name === last_name
+    );
 
     if (!result2) throw throwCustomError("BVN match not found", 404);
 

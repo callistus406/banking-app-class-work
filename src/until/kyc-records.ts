@@ -1,6 +1,7 @@
 export const kycRecords = [
   {
-    "fullName": "Adaobi Okonkwo",
+    "first_name": "Adaobi",
+    "last_name": "Okonkwo",
     "dateOfBirth": "1990-06-15",
     "gender": "Female",
     "nin": "12345678901",
@@ -28,7 +29,8 @@ export const kycRecords = [
     }
   },
   {
-    "fullName": "Emeka Umeh",
+    "first_name": "Emeka",
+    "last_name": "Umeh",
     "dateOfBirth": "1985-11-23",
     "gender": "Male",
     "nin": "10987654321",
@@ -60,7 +62,8 @@ export const kycRecords = [
     }
   },
   {
-    "fullName": "Fatima Bello",
+    "first_name": "Fatima",
+    "last_name": "Bello",
     "dateOfBirth": "1992-03-09",
     "gender": "Female",
     "nin": "19876543210",
@@ -88,7 +91,8 @@ export const kycRecords = [
     }
   },
   {
-    "fullName": "Tunde Adebayo",
+    "first_name": "Tunde",
+    "last_name": "Adebayo",
     "dateOfBirth": "1988-01-12",
     "gender": "Male",
     "nin": "11223344556",
