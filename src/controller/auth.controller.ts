@@ -99,10 +99,10 @@ export class AuthController {
 
   static bvnNinVerification = asyncWrapper(
     async (req: IRequest, res: Response) => {
-      const { bvn, nin } = req.body;
+      const {first_name,last_name, dateOfBirth,bvn, nin } = req.body;
       const userId = req.user.id;
 
-      const response = await UserService.verifyKyc({ nin, bvn, userId });
+      const response = await UserService.verifyKyc({ first_name,last_name, dateOfBirth,nin, bvn, userId });
 
       res.status(200).json({ success: true, payload: response });
     }
