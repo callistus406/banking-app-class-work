@@ -70,13 +70,6 @@ export class UserRepository {
     return response;
   }
 
-  static async findUserProfile(id: Types.ObjectId){
-    const response = await userModel.findById(id)
-
-    return response;
-
-  }
-
 
   static async updateProfile(id: Types.ObjectId, user: any) {
     const response = await userModel.findByIdAndUpdate(id, user, { new: true });
@@ -84,19 +77,7 @@ export class UserRepository {
     return response;
   }
 
-  static async findUserProfile(id: Types.ObjectId){
-    const response = await userModel.findById(id)
 
-    return response;
-
-  }
-
-
-  static async updateProfile(id: Types.ObjectId, user: any) {
-    const response = await userModel.findByIdAndUpdate(id, user, { new: true });
-    if (!response) return null;
-    return response;
-  }
 
   static async resetpassword(otp: number) {
     const response = await userModel.findOne({ otp });
