@@ -8,8 +8,8 @@ const enum TransactionStatus {
 const Transactionschema = new Schema(
   {
     amount: { type: Number, required: true },
-    senders_account: { type: String, required: true },
-    recievers_account: { type: String, required: true },
+    sendersAccount: { type: String, required: true },
+    receiversAccount: { type: String, required: true },
     tx_ref: { type: String, required: true },
     status: {
       type: String,

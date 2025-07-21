@@ -3,6 +3,7 @@ import { Response } from "express";
 import { IRegister } from "../@types/user";
 import { WalletService } from "../service/wallet.service";
 import { IRequest } from "../middleware/auth.middleware";
+import { Types } from "mongoose";
 
 export class WalletController {
   static getWalletByAccountNumber = asyncWrapper(
@@ -11,7 +12,6 @@ export class WalletController {
       const response = await WalletService.getWalletByAccountNumber(
         accountNumber
       );
-
 
       res.status(200).json({
         success: true,
@@ -45,16 +45,17 @@ export class WalletController {
     }
   );
 
+
   static transferMoney = asyncWrapper(
     async (req: IRequest, res: Response) => {
-      const { pin, amount,description,accountNumber } = req.body;
-
       const userId = req.user.id;
+      const { accountNumber, amount, pin, description } = req.body;
+
       const response = await WalletService.transferMoney(userId, {
+        accountNumber,
+        amount,
         pin,
         description,
-        accountNumber,
-        amount
       });
 
       res.status(200).json({
@@ -65,6 +66,24 @@ export class WalletController {
   );
 
 
+  static transactionHistory = asyncWrapper(
+  async (req: IRequest, res: Response) => {
+    const accountId = req.params.accountId;
+
+    if (!accountId) {
+      return res.status(400).json({
+        success: false,
+        payload: "Account ID is missing from request.",
+      });
+    }
+
+  const response = await WalletService.createTransactionHistory(accountId);
+    return res.status(200).json({
+      success: true,
+      payload: response,
+    });
+  }
+);
 
 
 }
