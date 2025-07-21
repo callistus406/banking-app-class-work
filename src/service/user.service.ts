@@ -93,7 +93,7 @@ export class UserService {
         await UserRepository.deleteUserByuId(account._id);
       }
     }
- 
+
     sendMail(
       {
         email: user.email,
@@ -105,7 +105,7 @@ export class UserService {
           name: `${user.last_name} ${user.first_name}`,
         },
       },
-      accountInfoTemplate 
+      accountInfoTemplate
     );
 
     return "Account created successfully";
@@ -316,8 +316,6 @@ export class UserService {
 
     const result = kycRecords.find((item) => item.nin === nin);
 
-
-
     if (!result) throw throwCustomError("NIN match not found", 404);
 
     const result2 = kycRecords.find((item) => item.bvn === bvn);
@@ -345,17 +343,15 @@ export class UserService {
     if (!response) throw throwCustomError("Unable to update profile", 500);
 
     return response;
-  }   
-
-  static async uploadProfile(path: string) {
-
-  const domain = `http://localhost:4000/${path}`;
-
-  const profile = await UserRepository.UploadProfileImage(domain);
-  
-  if (!profile) {
-    throw throwCustomError("Unable to update profile", 500);
   }
 
+  static async uploadProfile(path: string) {
+    const domain = `http://localhost:4000/${path}`;
+
+    const profile = await UserRepository.UploadProfileImage(domain);
+
+    if (!profile) {
+      throw throwCustomError("Unable to update profile", 500);
+    }
   }
 }
