@@ -4,7 +4,8 @@
   "main": "main.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn  --transpile-only  src/main.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "prepare": "husky"
   },
   "author": "callistus",
   "license": "ISC",
@@ -26,6 +27,7 @@
     "class-validator": "^0.14.2",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "husky": "^9.1.7",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "jwtoken": "^0.0.0",
