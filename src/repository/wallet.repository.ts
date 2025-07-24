@@ -15,7 +15,10 @@ export class WalletRepository {
   }
 
   static async getwalletByUserId(userId: Types.ObjectId) {
-    const response = await walletModel.findOne({ user_id: userId });
+    const response = await walletModel.findOne({ user_id: userId }).populate({
+      path: "user_id",
+      model: "User",
+    });
     if (!response) return null;
 
     return response;
@@ -34,6 +37,7 @@ export class WalletRepository {
     // Map the response to return only necessary fields
     return {
       _id: response._id,
+      email: (response.user_id as any).email,
       account_number: response.account_number,
       Accountname: `${(response.user_id as any).first_name} ${
         (response.user_id as any).last_name
@@ -111,21 +115,27 @@ export class WalletRepository {
   static async createWalletTransactionHistory(data: {
     walletId: Types.ObjectId;
     sendersAccount: string;
-    recieversAccount: string;
+    receiversAccount: string;
     tx_ref: string;
     amount: number;
     type: "CREDIT" | "DEBIT";
     status?: "PENDING" | "COMPLETED" | "FAILED";
   }, session: ClientSession) {
-    const transaction = await transactionModel.create({
-      ...data,
-
-      receiversAccount: data.recieversAccount,
+    console.log("Creating transaction history", data);
+    const transaction = await transactionModel.create(
+      
+     [ 
+      {
+        ...data,
+      receiversAccount: data.receiversAccount,
       status: data.status,
       transactionType: data.type,
-    });
+    },
+  ],
+  { session }
+    );
 
-    return await transaction.save({session});
+    return transaction[0];
   }
 }
  

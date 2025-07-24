@@ -2,6 +2,8 @@ import { Types } from "mongoose";
 import { WalletRepository } from "../repository/wallet.repository";
 import { transferValidator, validatePin } from "../validation/wallet.validator";
 import { throwCustomError } from "../middleware/errorHandler.midleware";
+import { sendMail } from "../until/nodemailer";
+import generateTransactionEmail from "../until/transaction-template";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { send } from "process";
@@ -151,19 +153,35 @@ export class WalletService {
        await WalletRepository.createWalletTransactionHistory({
           walletId: senderwallet._id,
           sendersAccount: senderwallet.account_number,
-          recieversAccount: data.accountNumber,
+          receiversAccount: data.accountNumber,
           tx_ref,
           amount: data.amount,
           type: "DEBIT",
           status: "COMPLETED",
-        }, session);
+        },session);
+
+        //sendmail to sender
+
+        sendMail(
+              {
+                email: (senderwallet.user_id as any).email,
+                subject: "Transaction Notification",
+                emailInfo: {
+                  customerName: `${(senderwallet.user_id as any).last_name} ${(senderwallet.user_id as any).first_name}`,
+                  accountName: `${(senderwallet.user_id as any).last_name} ${(senderwallet.user_id as any).first_name}`,
+                  accountNumber: senderwallet.account_number,
+                  name: `${(senderwallet.user_id as any).last_name} ${(senderwallet.user_id as any).first_name}`,
+                },
+              },
+              generateTransactionEmail
+            );
 
         // create transaction history for credit
 
          await WalletRepository.createWalletTransactionHistory({
           walletId: isValid._id,
           sendersAccount: senderwallet.account_number,
-          recieversAccount: isValid.account_number,
+          receiversAccount: isValid.account_number,
           tx_ref: tx_ref2,
           amount: data.amount,
           type: "CREDIT",
@@ -177,9 +195,7 @@ export class WalletService {
         payload: {
           transactionId: debit._id,
           accountNumber: debit.account_number,
-          accountName: `${(debit.user_id as any).first_name} ${
-            (debit.user_id as any).last_name
-          }`,
+          accountName: isValid.Accountname, 
           creditAccountNumber: data.accountNumber,
           amount: data.amount,
           description: data.description,
@@ -187,9 +203,9 @@ export class WalletService {
       };
     } catch (error:any) {
       await session.abortTransaction();
+      session.endSession();
       throw throwCustomError(error.message || "Transaction failed", 500);
     } finally {
-      session.endSession();
     }
   }
 
@@ -201,31 +217,31 @@ export class WalletService {
     // Logic to debit the account
   }
 
-  static async createTransactionHistory(data: {
-    wallet_id: Types.ObjectId;
-    senders_account: string;
-    recievers_account: string;
-    tx_ref: string;
-    amount: number;
-    type: "credit" | "debit";
-    status?: "pending" | "success" | "failed";
-  }) {
-    const response = await WalletRepository.createWalletTransactionHistory(
-      data
-    );
+  // static async createTransactionHistory(data: {
+  //   wallet_id: Types.ObjectId;
+  //   senders_account: string;
+  //   recievers_account: string;
+  //   tx_ref: string;
+  //   amount: number;
+  //   type: "credit" | "debit";
+  //   status?: "pending" | "success" | "failed";
+  // }) {
+  //   const response = await WalletRepository.createWalletTransactionHistory(
+  //     data
+  //   );
 
-    if (!response) {
-      throw throwCustomError("Failed to create transaction history", 500);
-    }
+  //   if (!response) {
+  //     throw throwCustomError("Failed to create transaction history", 500);
+  //   }
 
-    return {
-      senders_account: response.sendersAccount,
-      receivers_account: response.receiversAccount,
-      amount: response.amount,
-      status: response.status,
-      tx_ref: response.tx_ref,
-      type: response.status,
-      createdAt: response.createdAt,
-    };
-  }
+  //   return {
+  //     senders_account: response.sendersAccount,
+  //     receivers_account: response.receiversAccount,
+  //     amount: response.amount,
+  //     status: response.status,
+  //     tx_ref: response.tx_ref,
+  //     type: response.status,
+  //     createdAt: response.createdAt,
+  //   };
+  // }
 }
