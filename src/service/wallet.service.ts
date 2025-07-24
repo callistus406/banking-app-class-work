@@ -12,7 +12,7 @@ export class WalletService {
 
   static transfer(userId: Types.ObjectId) {}
 
-  //comment
+
 
   static async getWalletByAccountNumber(accountNumber: string) {
     const res = await WalletRepository.findAccountNumber(accountNumber);
