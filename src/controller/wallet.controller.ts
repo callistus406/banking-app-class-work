@@ -77,7 +77,15 @@ export class WalletController {
       });
     }
 
-  const response = await WalletService.createTransactionHistory(accountId);
+  const response = await WalletService.createTransactionHistory({
+    wallet_id: new Types.ObjectId(accountId),
+    senders_account: "sender_account",
+    recievers_account: "receiver_account",
+    tx_ref: "transaction_reference",
+    amount: 100,
+    type: "credit",
+    status: "success",
+  });
     return res.status(200).json({
       success: true,
       payload: response,

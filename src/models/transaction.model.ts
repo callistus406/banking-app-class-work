@@ -16,6 +16,11 @@ const Transactionschema = new Schema(
       enum: ["PENDING", "COMPLETED", "FAILED"],
       default: TransactionStatus.PENDING,
     },
+    transactionType: {
+      type: String,
+      enum: ["CREDIT", "DEBIT"],
+      default: "DEBIT" ,
+    },
   },
   {
     timestamps: true,
