@@ -1,4 +1,5 @@
 import { ClientSession, Types } from "mongoose";
+import { ClientSession, Types } from "mongoose";
 import { ICreateWallet } from "../@types/wallet";
 import { walletModel } from "../models/wallet.model";
 import { userModel } from "../models/user.model";
@@ -91,6 +92,7 @@ export class WalletRepository {
       { $inc: { balance: -amount } },
       { new: true, session }
     );
+
     if (!response) return null;
 
     return response;
@@ -107,35 +109,38 @@ export class WalletRepository {
       { $inc: { balance: amount } },
       { new: true, session }
     );
+
     if (!response) return null;
 
     return response;
   }
 
-  static async createWalletTransactionHistory(data: {
-    walletId: Types.ObjectId;
-    sendersAccount: string;
-    receiversAccount: string;
-    tx_ref: string;
-    amount: number;
-    type: "CREDIT" | "DEBIT";
-    status?: "PENDING" | "COMPLETED" | "FAILED";
-  }, session: ClientSession) {
-    console.log("Creating transaction history", data);
-    const transaction = await transactionModel.create(
-      
-     [ 
-      {
-        ...data,
-      receiversAccount: data.receiversAccount,
-      status: data.status,
-      transactionType: data.type,
+  static async createWalletTransactionHistory(
+    data: {
+      walletId: Types.ObjectId;
+      sendersAccount: string;
+      recieversAccount: string;
+      tx_ref: string;
+      amount: number;
+      type: "CREDIT" | "DEBIT";
+      status?: "PENDING" | "COMPLETED" | "FAILED";
     },
-  ],
-  { session }
+    session: ClientSession
+  ) {
+    console.log(data);
+
+    const transaction = await transactionModel.create(
+      [
+        {
+          ...data,
+          receiversAccount: data.recieversAccount,
+          status: data.status,
+          transactionType: data.type,
+        },
+      ],
+      { session }
     );
 
     return transaction[0];
   }
 }
- 

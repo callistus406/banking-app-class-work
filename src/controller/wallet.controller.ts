@@ -45,53 +45,41 @@ export class WalletController {
     }
   );
 
+  static transferMoney = asyncWrapper(async (req: IRequest, res: Response) => {
+    const userId = req.user.id;
+    const { accountNumber, amount, pin, description } = req.body;
 
-  static transferMoney = asyncWrapper(
-    async (req: IRequest, res: Response) => {
-      const userId = req.user.id;
-      const { accountNumber, amount, pin, description } = req.body;
+    const response = await WalletService.transferMoney(userId, {
+      accountNumber,
+      amount,
+      pin,
+      description,
+    });
 
-      const response = await WalletService.transferMoney(userId, {
-        accountNumber,
-        amount,
-        pin,
-        description,
-      });
-
-      res.status(200).json({
-        success: true,
-        payload: response,
-      });
-    }
-  );
-
-
-  static transactionHistory = asyncWrapper(
-  async (req: IRequest, res: Response) => {
-    const accountId = req.params.accountId;
-
-    if (!accountId) {
-      return res.status(400).json({
-        success: false,
-        payload: "Account ID is missing from request.",
-      });
-    }
-
-  const response = await WalletService.createTransactionHistory({
-    wallet_id: new Types.ObjectId(accountId),
-    senders_account: "sender_account",
-    recievers_account: "receiver_account",
-    tx_ref: "transaction_reference",
-    amount: 100,
-    type: "credit",
-    status: "success",
-  });
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       payload: response,
     });
-  }
-);
+  });
 
+  // static transactionHistory = asyncWrapper(
+  //   async (req: IRequest, res: Response) => {
+  //     const accountId = req.params.accountId;
 
+  //     if (!accountId) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         payload: "Account ID is missing from request.",
+  //       });
+  //     }
+
+  //     const response = await WalletService.createTransactionHistory(
+  //       new Types.ObjectId(accountId)
+  //     );
+  //     return res.status(200).json({
+  //       success: true,
+  //       payload: response,
+  //     });
+  //   }
+  // );
 }

@@ -18,8 +18,8 @@ const Transactionschema = new Schema(
     },
     transactionType: {
       type: String,
-      enum: ["CREDIT", "DEBIT"],
-      default: "DEBIT" ,
+      enum: ["DEBIT", "CREDIT"],
+      default: TransactionStatus.PENDING,
     },
   },
   {

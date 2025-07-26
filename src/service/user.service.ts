@@ -40,7 +40,7 @@ export class UserService {
       throw throwCustomError("Please login with your registered email", 400);
 
     //create otp
-    const otp = await UserService.generateOtp(user.email); 
+    const otp = await UserService.generateOtp(user.email);
     // send otp via mail
 
     sendMail(
@@ -54,7 +54,7 @@ export class UserService {
       },
       otpTemplate
     );
-     
+
     return "An email has been sent to your inbox";
   }
 
@@ -93,7 +93,7 @@ export class UserService {
         await UserRepository.deleteUserByuId(account._id);
       }
     }
- 
+
     sendMail(
       {
         email: user.email,
@@ -105,7 +105,7 @@ export class UserService {
           name: `${user.last_name} ${user.first_name}`,
         },
       },
-      accountInfoTemplate 
+      accountInfoTemplate
     );
 
     return "Account created successfully";
@@ -253,10 +253,10 @@ export class UserService {
   }
 
   static async resetPassword(data: {
-    email: string,
-    otp: string,
-    newPassword: string,
-    confirmPassword: string,
+    email: string;
+    otp: string;
+    newPassword: string;
+    confirmPassword: string;
   }) {
     const { email, otp, newPassword, confirmPassword } = data;
 
@@ -294,40 +294,56 @@ export class UserService {
   //=========================================|| KYC SECTION ||==================================
 
   static verifyKyc = async (data: {
-    first_name:string,
-    last_name:string,
-    dateOfBirth:string,
-    nin: string,
-    bvn: string,
-    userId: Types.ObjectId,
+    first_name: string;
+    last_name: string;
+    dateOfBirth: string;
+    nin: string;
+    bvn: string;
+    userId: Types.ObjectId;
   }) => {
-    const { first_name,last_name,dateOfBirth, nin, bvn, userId } = data;
+    const { first_name, last_name, dateOfBirth, nin, bvn, userId } = data;
     //check if user has  alread  done kyc
 
     const user = await UserRepository.findUserById(data.userId);
-  
 
     if (!user) throw throwCustomError("User not found", 404);
 
     if (user.kycStatus === "APPROVED")
       throw throwCustomError("You have already completed your kyc", 400);
 
-    const { error } = validateKyc.validate({first_name,last_name,dateOfBirth, nin, bvn });
+    const { error } = validateKyc.validate({
+      first_name,
+      last_name,
+      dateOfBirth,
+      nin,
+      bvn,
+    });
 
     if (error) throw throwCustomError(error.message, 422);
 
     //call external api
-    const isUser = kycRecords.find((user
-    ) => user.first_name === first_name && user.last_name === last_name)
-    if(!isUser) throw throwCustomError('invalid user', 422);
+    const isUser = kycRecords.find(
+      (user) => user.first_name === first_name && user.last_name === last_name
+    );
+    if (!isUser) throw throwCustomError("invalid user", 422);
 
     const isDob = kycRecords.find((x) => x.dateOfBirth === dateOfBirth);
-    if(!isDob)throw throwCustomError("Invalid credentials", 422);
+    if (!isDob) throw throwCustomError("Invalid credentials", 422);
 
-    const result = kycRecords.find((item) => item.nin === nin && item.first_name === first_name  && item.last_name === last_name);
+    const result = kycRecords.find(
+      (item) =>
+        item.nin === nin &&
+        item.first_name === first_name &&
+        item.last_name === last_name
+    );
     if (!result) throw throwCustomError("NIN match not found", 404);
 
-    const result2 = kycRecords.find((item) => item.bvn === bvn  && item.first_name === first_name  && item.last_name === last_name);
+    const result2 = kycRecords.find(
+      (item) =>
+        item.bvn === bvn &&
+        item.first_name === first_name &&
+        item.last_name === last_name
+    );
 
     if (!result2) throw throwCustomError("BVN match not found", 404);
 
@@ -352,17 +368,15 @@ export class UserService {
     if (!response) throw throwCustomError("Unable to update profile", 500);
 
     return response;
-  }   
-
-  static async uploadProfile(path: string) {
-
-  const domain = `http://localhost:4000/${path}`;
-
-  const profile = await UserRepository.UploadProfileImage(domain);
-  
-  if (!profile) {
-    throw throwCustomError("Unable to update profile", 500);
   }
 
+  static async uploadProfile(path: string) {
+    const domain = `http://localhost:4000/${path}`;
+
+    const profile = await UserRepository.UploadProfileImage(domain);
+
+    if (!profile) {
+      throw throwCustomError("Unable to update profile", 500);
+    }
   }
 }

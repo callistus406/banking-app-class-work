@@ -2,11 +2,13 @@ import { Types } from "mongoose";
 import { WalletRepository } from "../repository/wallet.repository";
 import { transferValidator, validatePin } from "../validation/wallet.validator";
 import { throwCustomError } from "../middleware/errorHandler.midleware";
-import { sendMail } from "../until/nodemailer";
-import generateTransactionEmail from "../until/transaction-template";
+
 import mongoose from "mongoose";
+
 import bcrypt from "bcrypt";
 import { send } from "process";
+import { walletModel } from "../models/wallet.model";
+import { sendMail } from "../until/nodemailer";
 export class WalletService {
   static getWallet(userId: Types.ObjectId) {}
 
@@ -72,10 +74,11 @@ export class WalletService {
     //create transaction
 
     const session = await mongoose.startSession();
+
     session.startTransaction();
 
     try {
-      // Logic to debit the account (with transaction)
+      // Logic to debit the account
       const senderwallet = await WalletRepository.getwalletByUserId(userId);
       if (!senderwallet)
         throw throwCustomError("Account number does not exist", 404);
@@ -96,13 +99,21 @@ export class WalletService {
       // check pin match
       if (!senderwallet.transaction_pin)
         throw throwCustomError("Transaction pin not set", 400);
+      // check pin match
+      if (!senderwallet.transaction_pin)
+        throw throwCustomError("Transaction pin not set", 400);
 
       const isInvalidPin = await bcrypt.compare(
         data.pin,
         senderwallet.transaction_pin
       );
-      if (isInvalidPin) throw throwCustomError("Invalid transaction pin", 400);
+      if (!isInvalidPin) throw throwCustomError("Invalid transaction pin", 400);
 
+      if (senderwallet.account_number === data.accountNumber)
+        throw throwCustomError(
+          "You cannot transfer money to your own account",
+          400
+        );
       if (senderwallet.account_number === data.accountNumber)
         throw throwCustomError(
           "You cannot transfer money to your own account",
@@ -121,7 +132,7 @@ export class WalletService {
       if (data.amount > walletBalance)
         throw throwCustomError("Insufficient balance", 400);
 
-      // debit the sender's account  (with transaction)
+      // debit the sender's account (with transaction)
       const debit = await WalletRepository.debitAccount(
         senderwallet.account_number,
         userId,
@@ -134,85 +145,84 @@ export class WalletService {
           500
         );
 
-      // (with transaction)
-
+      //(with transaction)
       const credit = await WalletRepository.creditAccount(
         data.accountNumber,
         userId,
         data.amount,
         session
       );
+
+      const tx_ref = `Ref-${Date.now()}`;
+      const tx_ref2 = `Ref-${Date.now()}+1`;
+
       if (!credit)
         throw throwCustomError(
           "Something went wrong while crediting the account",
           500
         );
-
-        const tx_ref = `Ref-${Date.now()}`;
-        const tx_ref2 = `Ref-${Date.now()}+1`;
-        
-        // create transaction history for debit
-       await WalletRepository.createWalletTransactionHistory({
+      await WalletRepository.createWalletTransactionHistory(
+        {
           walletId: senderwallet._id,
           sendersAccount: senderwallet.account_number,
-          receiversAccount: data.accountNumber,
+          recieversAccount: isValid.account_number,
+          status: "COMPLETED",
           tx_ref,
           amount: data.amount,
           type: "DEBIT",
-          status: "COMPLETED",
-        },session);
+        },
+        session
+      );
 
-        //sendmail to sender
+      // sendMail(
+      //   {
+      //     email: (senderwallet.user_id as any).email,
+      //     subject: "WALLET CONFIRMATION",
+      //     emailInfo: {
+      //       customerName: `${user.last_name} ${user.first_name}`,
+      //       accountName: `${user.last_name} ${user.first_name}`,
+      //       accountNumber: accountNumber,
+      //       name: `${user.last_name} ${user.first_name}`,
+      //     },
+      //   },
+      //   accountInfoTemplate
+      // );
 
-        sendMail(
-              {
-                email: (senderwallet.user_id as any).email,
-                subject: "Transaction Notification",
-                emailInfo: {
-                  customerName: `${(senderwallet.user_id as any).last_name} ${(senderwallet.user_id as any).first_name}`,
-                  accountName: `${(senderwallet.user_id as any).last_name} ${(senderwallet.user_id as any).first_name}`,
-                  accountNumber: senderwallet.account_number,
-                  name: `${(senderwallet.user_id as any).last_name} ${(senderwallet.user_id as any).first_name}`,
-                },
-              },
-              generateTransactionEmail
-            );
-
-        // create transaction history for credit
-
-         await WalletRepository.createWalletTransactionHistory({
+      await WalletRepository.createWalletTransactionHistory(
+        {
           walletId: isValid._id,
           sendersAccount: senderwallet.account_number,
-          receiversAccount: isValid.account_number,
+          recieversAccount: isValid.account_number,
+          status: "COMPLETED",
           tx_ref: tx_ref2,
           amount: data.amount,
           type: "CREDIT",
-          status: "COMPLETED",
-        }, session);
+        },
+        session
+      );
 
-        session.commitTransaction();
+      session.commitTransaction();
       return {
         success: true,
         message: "Transfer successful",
         payload: {
           transactionId: debit._id,
           accountNumber: debit.account_number,
-          accountName: isValid.Accountname, 
+          accountName: isValid.Accountname,
           creditAccountNumber: data.accountNumber,
           amount: data.amount,
           description: data.description,
         },
       };
-    } catch (error:any) {
-      await session.abortTransaction();
+    } catch (error: any) {
+      session.abortTransaction();
       session.endSession();
-      throw throwCustomError(error.message || "Transaction failed", 500);
-    } finally {
+      throw throwCustomError(error.message, 500);
     }
   }
 
   static async debitAccount(data: {
-    accountNumber: string;
+    acccountNumber: string;
     amount: number;
     pin: string;
   }) {
@@ -231,11 +241,36 @@ export class WalletService {
   //   const response = await WalletRepository.createWalletTransactionHistory(
   //     data
   //   );
+  // static async createTransactionHistory(data: {
+  //   wallet_id: Types.ObjectId;
+  //   senders_account: string;
+  //   recievers_account: string;
+  //   tx_ref: string;
+  //   amount: number;
+  //   type: "credit" | "debit";
+  //   status?: "pending" | "success" | "failed";
+  // }) {
+  //   const response = await WalletRepository.createWalletTransactionHistory(
+  //     data
+  //   );
 
   //   if (!response) {
   //     throw throwCustomError("Failed to create transaction history", 500);
   //   }
+  //   if (!response) {
+  //     throw throwCustomError("Failed to create transaction history", 500);
+  //   }
 
+  //   return {
+  //     senders_account: response.sendersAccount,
+  //     receivers_account: response.receiversAccount,
+  //     amount: response.amount,
+  //     status: response.status,
+  //     tx_ref: response.tx_ref,
+  //     type: response.status,
+  //     createdAt: response.createdAt,
+  //   };
+  // }
   //   return {
   //     senders_account: response.sendersAccount,
   //     receivers_account: response.receiversAccount,
