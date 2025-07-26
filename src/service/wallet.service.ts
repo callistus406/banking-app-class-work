@@ -14,6 +14,8 @@ export class WalletService {
 
   static transfer(userId: Types.ObjectId) {}
 
+  //comment
+
   static async getWalletByAccountNumber(accountNumber: string) {
     const res = await WalletRepository.findAccountNumber(accountNumber);
     if (!res) return null;
@@ -97,6 +99,9 @@ export class WalletService {
       // check pin match
       if (!senderwallet.transaction_pin)
         throw throwCustomError("Transaction pin not set", 400);
+      // check pin match
+      if (!senderwallet.transaction_pin)
+        throw throwCustomError("Transaction pin not set", 400);
 
       const isInvalidPin = await bcrypt.compare(
         data.pin,
@@ -104,6 +109,11 @@ export class WalletService {
       );
       if (!isInvalidPin) throw throwCustomError("Invalid transaction pin", 400);
 
+      if (senderwallet.account_number === data.accountNumber)
+        throw throwCustomError(
+          "You cannot transfer money to your own account",
+          400
+        );
       if (senderwallet.account_number === data.accountNumber)
         throw throwCustomError(
           "You cannot transfer money to your own account",
@@ -231,11 +241,36 @@ export class WalletService {
   //   const response = await WalletRepository.createWalletTransactionHistory(
   //     data
   //   );
+  // static async createTransactionHistory(data: {
+  //   wallet_id: Types.ObjectId;
+  //   senders_account: string;
+  //   recievers_account: string;
+  //   tx_ref: string;
+  //   amount: number;
+  //   type: "credit" | "debit";
+  //   status?: "pending" | "success" | "failed";
+  // }) {
+  //   const response = await WalletRepository.createWalletTransactionHistory(
+  //     data
+  //   );
 
   //   if (!response) {
   //     throw throwCustomError("Failed to create transaction history", 500);
   //   }
+  //   if (!response) {
+  //     throw throwCustomError("Failed to create transaction history", 500);
+  //   }
 
+  //   return {
+  //     senders_account: response.sendersAccount,
+  //     receivers_account: response.receiversAccount,
+  //     amount: response.amount,
+  //     status: response.status,
+  //     tx_ref: response.tx_ref,
+  //     type: response.status,
+  //     createdAt: response.createdAt,
+  //   };
+  // }
   //   return {
   //     senders_account: response.sendersAccount,
   //     receivers_account: response.receiversAccount,
