@@ -6,13 +6,14 @@ import { Types } from "mongoose";
 
 export interface IRequest extends Request {
   user: {
-    id:Types.ObjectId,
-    firstName?:string | null,
-    email?:string | null
+    id: Types.ObjectId;
+    firstName?: string | null;
+    email?: string | null;
+    kycStatus?: string;
   };
 }
 
-export const invalidTokens:string[] = []
+export const invalidTokens: string[] = [];
 export const authMiddleware = (
   req: IRequest,
   res: Response,
@@ -25,13 +26,13 @@ export const authMiddleware = (
   if (!token) return res.sendStatus(401);
   console.log(token);
 
-
   //check for blacklisted token
 
-  if(invalidTokens.includes(token)) return res.status(403).json({
-    success:false,
-    message: "Forbidden"
-  })
+  if (invalidTokens.includes(token))
+    return res.status(403).json({
+      success: false,
+      message: "Forbidden",
+    });
   jwt.verify(token, JWT_SECRETE, async (err, data: any) => {
     if (err) {
       return res.sendStatus(401);
@@ -45,6 +46,7 @@ export const authMiddleware = (
       firstName: user?.first_name,
       email: user?.email,
       id: user._id,
+      kycStatus: user.kycStatus,
     };
     next();
   });

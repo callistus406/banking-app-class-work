@@ -1,85 +1,109 @@
 function generateTransactionEmail(data: {
   name: string;
-  transactionId: string;
-  amount: number;
-  date: string;
-  paymentMethod: string;
-  status: string;
+  transaction_id: string;
+  transaction_amount: number;
+  transaction_date: string;
+  payment_method: string;
+  transaction_status: "Success" | "Failed";
   year: any;
+  paymentType: string;
 }) {
-  const { name, transactionId, amount, date, paymentMethod, status, year } =
-    data;
-  const isSuccess = status === "success";
+  const {
+    name,
+    transaction_id,
+    transaction_amount,
+    transaction_date,
+    payment_method,
+    transaction_status,
+    year,
+  } = data;
+  const isSuccess = transaction_status.toLowerCase() === "success";
 
-  const statusColor = isSuccess ? "#28a745" : "#dc3545";
-  const statusMessage = isSuccess
-    ? "Transaction Successful"
-    : "Transaction Failed";
-  const statusDescription = isSuccess
-    ? `Your payment of ${amount} has been processed successfully.`
-    : `We were unable to process your payment of ${amount}. Please try again or contact support.`;
+  const status_heading = isSuccess
+    ? "✅ Transaction Successful"
+    : "❌ Transaction Failed";
+
+  const status_message = isSuccess
+    ? "We’re happy to let you know your transaction was completed successfully."
+    : "Unfortunately, your transaction could not be processed. Please try again or contact support.";
+
+  const status_color = isSuccess ? "#28a745" : "#dc3545";
 
   return `
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Transaction Notification</title>
+  <meta charset="UTF-8">
+  <title>${status_heading}</title>
+  <style>
+    @media only screen and (max-width: 600px) {
+      .container {
+        width: 100% !important;
+        padding: 10px !important;
+      }
+    }
+  </style>
 </head>
-<body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f4f4">
+<body style="margin:0; padding:0; background-color:#f5f6fa; font-family:Arial, sans-serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f6fa;">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="margin:20px 0;">
+        <table class="container" width="600" cellpadding="20" cellspacing="0" style="background-color:#ffffff; margin:20px 0; border-radius:8px; box-shadow:0 0 5px rgba(0,0,0,0.1);">
           <tr>
-            <td align="center" style="padding: 30px; background-color: #007bff; color: #ffffff; font-size: 24px; font-weight: bold;">
-              Transaction Notification
+            <td align="center" style="padding-top:30px;">
+              <h2 style="margin:0; font-size:24px;">${status_heading}</h2>
+              <p style="color:#888; font-size:14px;">Transaction ID: ${transaction_id}</p>
             </td>
           </tr>
+
           <tr>
-            <td style="padding: 30px; color: #333333; font-size: 16px;">
-              <p>Hello ${name},</p>
+            <td>
+              <p>Hi ${name},</p>
+              <p>${status_message}</p>
 
-              <div style="padding: 20px; background-color: ${statusColor}; color: #fff; border-radius: 5px; margin: 20px 0;">
-                <strong style="font-size: 18px;">${statusMessage}</strong><br/>
-                ${statusDescription}
-              </div>
-
-              <table cellpadding="10" cellspacing="0" border="0" width="100%" style="background-color:#f9f9f9; border:1px solid #ddd;">
-                <tr>
-                  <td><strong>Transaction ID:</strong></td>
-                  <td>${transactionId}</td>
-                </tr>
+              <table width="100%" cellpadding="8" cellspacing="0" style="margin-top:20px; background-color:#f9f9f9; border-radius:6px;">
                 <tr>
                   <td><strong>Amount:</strong></td>
-                  <td>${amount}</td>
+                  <td>${transaction_amount}</td>
                 </tr>
                 <tr>
                   <td><strong>Date:</strong></td>
-                  <td>${date}</td>
+                  <td>${transaction_date}</td>
                 </tr>
                 <tr>
-                  <td><strong>Method:</strong></td>
-                  <td>${paymentMethod}</td>
+                  <td><strong>Payment Method:</strong></td>
+                  <td>${payment_method}</td>
+                </tr>
+                <tr>
+                  <td><strong>Status:</strong></td>
+                  <td style="color: ${status_color};"><strong>${transaction_status}</strong></td>
                 </tr>
               </table>
 
-              <p>If you have any questions, feel free to contact our support team.</p>
+              ${
+                isSuccess
+                  ? `<p style="margin-top:30px;">You can keep this email as a receipt for your records.</p>`
+                  : `<p style="margin-top:30px;">Please double-check your payment details and try again.</p>`
+              }
 
-              <p>Best regards,<br/>Your Company Team</p>
+              <p style="margin-top:20px;">If you have any questions, feel free to reply to this email.</p>
+              <p>Thanks,<br>The schoolLife Banking Team</p>
             </td>
           </tr>
+
           <tr>
-            <td align="center" style="background-color: #f1f1f1; padding: 20px; font-size: 12px; color: #888888;">
-              &copy; ${new Date().getFullYear()} Your Company. All rights reserved.
+            <td align="center" style="font-size:12px; color:#999;">
+              <p style="margin-top:40px;">© ${new Date().getFullYear()}. All rights reserved.</p>
             </td>
           </tr>
         </table>
       </td>
     </tr>
   </table>
+
 </body>
 </html>
 `;
 }
+export default generateTransactionEmail;

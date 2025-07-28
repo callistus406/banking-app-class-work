@@ -5,6 +5,7 @@ import { preSchema, registerschema } from "../validation/user-schema";
 import { authMiddleware } from "../middleware/auth.middleware";
 import { WalletController } from "../controller/wallet.controller";
 import { upload } from "../config/multer.config";
+import { verifyKyc } from "../middleware/kyc.middleware";
 //import { authMiddleware } from "../middleware/auth.middleware";
 
 const router = express.Router();
@@ -15,14 +16,13 @@ router.post("/login", AuthController.login);
 router.post("/request-password-reset", AuthController.requestPasswordReset);
 router.post("/verify-otp", AuthController.validateOtp);
 router.post("/reset-password/:otp", AuthController.resetPassword);
-router.patch("/profile", authMiddleware as any, AuthController.getProfile);
-router.post("/update-profile", AuthController.updateProfile);
-router.post("/logout", authMiddleware as any, AuthController.logout);
-router.post(
-  "/wallets/transfer",
+router.get("/profile", authMiddleware as any, AuthController.getProfile);
+router.patch(
+  "/update-profile",
   authMiddleware as any,
-  WalletController.transferMoney as any
+  AuthController.updateProfile
 );
+router.post("/logout", authMiddleware as any, AuthController.logout);
 router.get(
   "/wallets/search/:accountNumber",
   authMiddleware as any,
@@ -36,6 +36,7 @@ router.get(
 router.patch(
   "/wallets/transaction-pin",
   authMiddleware as any,
+  verifyKyc as any,
   WalletController.updateWalletPin as any
 );
 router.post(
@@ -43,9 +44,23 @@ router.post(
   upload.single("file") as any,
   AuthController.uploadProfile as any
 );
-router.post("/kyc", authMiddleware as any, AuthController.bvnNinVerification);
+router.post(
+  "/kyc",
+  authMiddleware as any,
 
-// router.get("/wallets/transaction-history/:accountId", authMiddleware as any, WalletController.transactionHistory as any);
+  AuthController.bvnNinVerification
+);
+router.post(
+  "/wallets/transfer",
+  authMiddleware as any,
+  verifyKyc as any,
+  WalletController.transferMoney as any
+);
+router.get(
+  "/wallets/transaction-history/:accountId",
+  authMiddleware as any,
+  WalletController.transactionHistory as any
+);
 
 export default router;
 

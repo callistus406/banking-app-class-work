@@ -77,12 +77,13 @@ export class AuthController {
   });
 
   static updateProfile = asyncWrapper(async (req: IRequest, res: Response) => {
-    const {id, user} = req.body;
-  
-    if (!id) {
-      return res.status(400).json({ success: false, message: "User ID is required" });
-    }
-    const response = await UserService.updateProfile(id, user);
+    const { firstName, lastName } = req.body;
+    const id = req.user.id;
+
+    const response = await UserService.updateProfile(id, {
+      firstName,
+      lastName,
+    });
 
     res.status(200).json({ success: true, payload: response });
   });
@@ -99,17 +100,22 @@ export class AuthController {
 
   static bvnNinVerification = asyncWrapper(
     async (req: IRequest, res: Response) => {
-      const {first_name,last_name, dateOfBirth,bvn, nin } = req.body;
+      const { dateOfBirth, bvn, nin } = req.body;
       const userId = req.user.id;
 
-      const response = await UserService.verifyKyc({ first_name,last_name, dateOfBirth,nin, bvn, userId });
+      const response = await UserService.verifyKyc({
+        dateOfBirth,
+        nin,
+        bvn,
+        userId,
+      });
 
       res.status(200).json({ success: true, payload: response });
     }
   );
 
-  static async uploadProfile(req:Request, res: Response) {
-   const path = req.file?.path;
+  static async uploadProfile(req: Request, res: Response) {
+    const path = req.file?.path;
     console.log("File path:", path);
 
     if (!path) {
