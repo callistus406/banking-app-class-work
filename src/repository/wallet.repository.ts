@@ -1,5 +1,4 @@
 import { ClientSession, Types } from "mongoose";
-import { ClientSession, Types } from "mongoose";
 import { ICreateWallet } from "../@types/wallet";
 import { walletModel } from "../models/wallet.model";
 import { userModel } from "../models/user.model";
