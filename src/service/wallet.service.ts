@@ -166,11 +166,12 @@ export class WalletService {
           {
             walletId: senderwallet._id,
             sendersAccount: senderwallet.account_number,
-            receiversAccount: data.accountNumber,
+            recieversAccount: data.accountNumber,
             tx_ref,
             amount: data.amount,
             type: "DEBIT",
             status: "COMPLETED",
+            userId: senderwallet._id,
           },
           session
         );
@@ -178,17 +179,17 @@ export class WalletService {
       //sendmail to sender
 
       // create transaction history for credit
-
       const transaction2 =
         await WalletRepository.createWalletTransactionHistory(
           {
             walletId: isValid._id,
             sendersAccount: senderwallet.account_number,
-            receiversAccount: isValid.account_number,
+            recieversAccount: isValid.account_number,
             tx_ref: tx_ref2,
             amount: data.amount,
             type: "CREDIT",
             status: "COMPLETED",
+            userId: isValid._id,
           },
           session
         );
@@ -290,39 +291,22 @@ export class WalletService {
     }
   }
 
-  static async debitAccount(data: {
-    accountNumber: string;
-    amount: number;
-    pin: string;
-  }) {
-    // Logic to debit the account
+  static async createTransactionHistory(
+    filter: {
+      page: string;
+      limit: string;
+      search: string;
+    },
+    id: Types.ObjectId
+  ) {
+    const page = parseInt(filter.page) || 1;
+    const limit = parseInt(filter.limit) || 10;
+
+    return await WalletRepository.getTransactions(
+      page,
+      limit,
+      filter.search,
+      id
+    );
   }
-
-  // static async createTransactionHistory(data: {
-  //   wallet_id: Types.ObjectId;
-  //   senders_account: string;
-  //   recievers_account: string;
-  //   tx_ref: string;
-  //   amount: number;
-  //   type: "credit" | "debit";
-  //   status?: "pending" | "success" | "failed";
-  // }) {
-  //   const response = await WalletRepository.createWalletTransactionHistory(
-  //     data
-  //   );
-
-  //   if (!response) {
-  //     throw throwCustomError("Failed to create transaction history", 500);
-  //   }
-
-  //   return {
-  //     senders_account: response.sendersAccount,
-  //     receivers_account: response.receiversAccount,
-  //     amount: response.amount,
-  //     status: response.status,
-  //     tx_ref: response.tx_ref,
-  //     type: response.status,
-  //     createdAt: response.createdAt,
-  //   };
-  // }
 }
