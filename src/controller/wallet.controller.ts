@@ -62,24 +62,24 @@ export class WalletController {
     });
   });
 
-  // static transactionHistory = asyncWrapper(
-  //   async (req: IRequest, res: Response) => {
-  //     const accountId = req.params.accountId;
+  static transactions = asyncWrapper(async (req: IRequest, res: Response) => {
+    const { page, limit, search } = req.query as {
+      page: string;
+      limit: string;
+      search: string;
+    };
 
-  //     if (!accountId) {
-  //       return res.status(400).json({
-  //         success: false,
-  //         payload: "Account ID is missing from request.",
-  //       });
-  //     }
-
-  //     const response = await WalletService.createTransactionHistory(
-  //       new Types.ObjectId(accountId)
-  //     );
-  //     return res.status(200).json({
-  //       success: true,
-  //       payload: response,
-  //     });
-  //   }
-  // );
+    const response = await WalletService.createTransactionHistory(
+      {
+        page,
+        limit,
+        search,
+      },
+      req.user.id
+    );
+    return res.status(200).json({
+      success: true,
+      payload: response,
+    });
+  });
 }

@@ -5,6 +5,7 @@ import { preSchema, registerschema } from "../validation/user-schema";
 import { authMiddleware } from "../middleware/auth.middleware";
 import { WalletController } from "../controller/wallet.controller";
 import { upload } from "../config/multer.config";
+import { verifyKyc } from "../middleware/kyc.middleware";
 //import { authMiddleware } from "../middleware/auth.middleware";
 
 const router = express.Router();
@@ -15,14 +16,13 @@ router.post("/login", AuthController.login);
 router.post("/request-password-reset", AuthController.requestPasswordReset);
 router.post("/verify-otp", AuthController.validateOtp);
 router.post("/reset-password/:otp", AuthController.resetPassword);
-router.patch("/profile", authMiddleware as any, AuthController.getProfile);
-router.post("/update-profile", AuthController.updateProfile);
-router.post("/logout", authMiddleware as any, AuthController.logout);
-router.post(
-  "/wallets/transfer",
+router.get("/profile", authMiddleware as any, AuthController.getProfile);
+router.patch(
+  "/update-profile",
   authMiddleware as any,
-  WalletController.transferMoney as any
+  AuthController.updateProfile
 );
+router.post("/logout", authMiddleware as any, AuthController.logout);
 router.get(
   "/wallets/search/:accountNumber",
   authMiddleware as any,
@@ -36,6 +36,7 @@ router.get(
 router.patch(
   "/wallets/transaction-pin",
   authMiddleware as any,
+  verifyKyc as any,
   WalletController.updateWalletPin as any
 );
 router.post(
@@ -43,50 +44,22 @@ router.post(
   upload.single("file") as any,
   AuthController.uploadProfile as any
 );
-router.post("/kyc", authMiddleware as any, AuthController.bvnNinVerification);
+router.post(
+  "/kyc",
+  authMiddleware as any,
 
-// router.get("/wallets/transaction-history/:accountId", authMiddleware as any, WalletController.transactionHistory as any);
+  AuthController.bvnNinVerification
+);
+router.post(
+  "/wallets/transfer",
+  authMiddleware as any,
+  verifyKyc as any,
+  WalletController.transferMoney as any
+);
+router.get(
+  "/wallets/transaction",
+  authMiddleware as any,
+  WalletController.transactions
+);
 
 export default router;
-
-// ppk_live_27e0d8da7ed5818911944f70
-// secrete
-// psk_live_26f9ac7c71e5b8ba6a68afc8c25aca74
-
-// {
-//     "merchantId": "680a063892a3386adfcc7765",
-//     "accountNumber": "1100013689",
-//     "accountName": "Genius Merchant Account",
-//     "subAccountPrefix": "GENIUSMER",
-//     "bankName": "PettySave MFB",
-//     "bankCode": "090768",
-//     "provider": "qore",
-//     "isVirtual": false,
-//     "status": "active",
-//     "balance": 0,
-//     "currency": "NGN",
-//     "providerMetadata": {
-//         "CustomerIDInString": null,
-//         "IsSuccessful": true,
-//         "Message": {
-//             "AccountNumber": "1100013689",
-//             "BankoneAccountNumber": "08120011120001368",
-//             "CreationMessage": null,
-//             "CustomerID": "001368",
-//             "FullName": "Doe John",
-//             "Id": 1973
-//         },
-//         "Page": null,
-//         "TransactionTrackingRef": null
-//     },
-//     "archived": false,
-//     "_id": "6869324c5c573ecfee01041f",
-//     "createdAt": "2025-07-05T14:10:20.068Z",
-//     "updatedAt": "2025-07-05T14:10:20.068Z",
-//     "__v": 0,
-//     "accountId": "6869324c5c573ecfee01041f"
-// }
-
-// psk_live_de5eb6dcf618190bba06ef1cf948af29
-
-// ppk_live_56fc0079a81f1dfa5e9998de
