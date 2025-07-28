@@ -123,6 +123,7 @@ export class WalletRepository {
       amount: number;
       type: "CREDIT" | "DEBIT";
       status?: "PENDING" | "COMPLETED" | "FAILED";
+      userId: Types.ObjectId;
     },
     session: ClientSession
   ) {
@@ -135,11 +136,48 @@ export class WalletRepository {
           receiversAccount: data.recieversAccount,
           status: data.status,
           transactionType: data.type,
+          userId: data.userId,
         },
       ],
       { session }
     );
 
     return transaction[0];
+  }
+
+  static async getTransactions(
+    page: number,
+    limit: number,
+    search: string,
+    id: Types.ObjectId
+  ) {
+    const skip = (page - 1) * limit;
+
+    const filter = {
+      $or: [
+        { status: { $regex: search, $options: "i" } },
+        { transactionType: { $regex: search, $options: "i" } },
+      ],
+    };
+    console.log(filter);
+
+    const response = await transactionModel
+      .find(filter)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    const count = await transactionModel.countDocuments();
+
+    const total = Math.ceil(count / limit);
+    return {
+      transactions: response,
+      meta: {
+        pages: total,
+        page: page,
+        limit: limit,
+        totalRecords: count,
+      },
+    };
   }
 }

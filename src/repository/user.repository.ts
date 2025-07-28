@@ -70,14 +70,15 @@ export class UserRepository {
     return response;
   }
 
-
   static async updateProfile(id: Types.ObjectId, user: any) {
-    const response = await userModel.findByIdAndUpdate(id, user, { new: true });
+    const response = await userModel.findByIdAndUpdate(
+      id,
+      { first_name: user.firstName, last_name: user.lastName },
+      { new: true }
+    );
     if (!response) return null;
     return response;
   }
-
-
 
   static async resetpassword(otp: number) {
     const response = await userModel.findOne({ otp });
@@ -106,17 +107,14 @@ export class UserRepository {
     return response;
   }
 
-
-
-
-    static async UploadProfileImage(path: string) {
-       if (!path || typeof path !== 'string') {
-    throw new Error('A valid image path is required.');
-  }
-      const response = await UploadModel.create({
-        filePath: path
-      });
-
-      return response;
+  static async UploadProfileImage(path: string) {
+    if (!path || typeof path !== "string") {
+      throw new Error("A valid image path is required.");
     }
+    const response = await UploadModel.create({
+      filePath: path,
+    });
+
+    return response;
+  }
 }

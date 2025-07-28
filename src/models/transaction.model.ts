@@ -1,4 +1,4 @@
-import Mongoose, { Schema } from "mongoose";
+import Mongoose, { Schema, Types } from "mongoose";
 
 const enum TransactionStatus {
   PENDING = "PENDING",
@@ -7,6 +7,7 @@ const enum TransactionStatus {
 }
 const Transactionschema = new Schema(
   {
+    userId: { type: Types.ObjectId, ref: "User" },
     amount: { type: Number, required: true },
     sendersAccount: { type: String, required: true },
     receiversAccount: { type: String, required: true },
@@ -22,6 +23,7 @@ const Transactionschema = new Schema(
       default: TransactionStatus.PENDING,
     },
   },
+
   {
     timestamps: true,
   }
