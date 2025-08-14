@@ -10,10 +10,11 @@ RUN npm install
 
 
 
-COPY . ./
+COPY . /app/
 
 
 EXPOSE 4000
 
 
 CMD [ "npm","run", "dev" ]
+
