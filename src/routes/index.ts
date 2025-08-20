@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Response } from "express";
 import { AuthController } from "../controller/auth.controller";
 import { validator } from "../middleware/validator.middleware";
 import { preSchema, registerschema } from "../validation/user-schema";
@@ -61,5 +61,10 @@ router.get(
   authMiddleware as any,
   WalletController.transactions
 );
+
+router.get("/test", (req: any, res: Response) => {
+  console.log("HIt");
+  res.sendStatus(200);
+});
 
 export default router;
