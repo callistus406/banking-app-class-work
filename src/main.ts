@@ -5,6 +5,10 @@ import helmet from "helmet";
 import { mongoConnection } from "./config/db.connection";
 import { handleCustomError } from "./middleware/errorHandler.midleware";
 import router from "./routes";
+import { limiter } from "./middleware/reate-limit";
+import helmet from "helmet";
+import cors from "cors";
+
 // import dotenv from "dotenv";
 // dotenv.config();
 const app = express();
@@ -14,10 +18,6 @@ const port = 4000;
 app.use(express.json());
 
 app.use(logger);
-
-app.use(helmet({}));
-
-app.use(limiter)
 
 app.use("/api/v1",router);
 // app.use("/api/v2",router);

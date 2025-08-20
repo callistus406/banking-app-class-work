@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: bank-app2
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - "27018:27017"
+      
+  # redis:
+  #   image: latest
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+  #     interval: 1s
+  #     timeout: 3s
+  #     retries: 5
+  #   command: ["redis-server"]
+
+ 

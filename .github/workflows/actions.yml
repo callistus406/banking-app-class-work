@@ -1,0 +1,44 @@
+name: Deploy Node.js App with Docker Compose (Multiple Services)
+
+on:
+  push:
+    branches:
+      - main # Trigger deployment on push to main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the latest code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up SSH Agent
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Test SSH Connection
+        env:
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+        run: |
+          echo "Testing SSH connection to server using username '${SERVER_USER}'"
+          ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} -p 22 "echo 'Connected as $(whoami)'"
+
+      # Step 3: SSH into the server and deploy the updated services using Docker Compose
+      - name: Deploy to Production Server
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          debug: true
+          password: ${{ secrets.SERVER_PASSWORD }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/callu/bank-app  # Change this to the path of your app on the server
+            git pull origin main
+            docker-compose pull  # Pull the latest images for all services
+            docker-compose down  # Stop and remove the current containers
+            docker-compose up -d --build  # Start the new containers in detached mode

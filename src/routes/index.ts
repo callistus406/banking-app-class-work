@@ -70,4 +70,9 @@ router.get(
 
 );
 
+router.get("/test", (req: any, res: Response) => {
+  console.log("HIt");
+  res.sendStatus(200);
+});
+
 export default router;
