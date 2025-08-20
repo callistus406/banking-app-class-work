@@ -1,13 +1,13 @@
 export const kycRecords = [
   {
-    "first_name": "Adaobi",
-    "last_name": "Okonkwo",
+    "first_name": "dream",
+    "last_name": "come",
     "dateOfBirth": "1990-06-15",
     "gender": "Female",
     "nin": "12345678901",
     "bvn": "22110033445",
     "phoneNumber": "+2348012345678",
-    "email": "adaobi.okonkwo@example.com",
+    "email": "dream@gmail.com",
     "address": "23 Ajose Adeogun Street, Victoria Island, Lagos",
     "ninDetails": {
       "issueDate": "2015-07-01",

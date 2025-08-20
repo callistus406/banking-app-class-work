@@ -7,12 +7,13 @@ import generateTransactionEmail from "../until/transaction-template";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { send } from "process";
+import { any } from "joi";
 export class WalletService {
   static getWallet(userId: Types.ObjectId) {}
 
   static transfer(userId: Types.ObjectId) {}
 
-  //comment
+
 
   static async getWalletByAccountNumber(accountNumber: string) {
     const res = await WalletRepository.findAccountNumber(accountNumber);
@@ -74,6 +75,7 @@ export class WalletService {
     const session = await mongoose.startSession();
     session.startTransaction();
 
+
     const obj = {} as {
       name: string;
       transaction_id: string;
@@ -83,11 +85,11 @@ export class WalletService {
       transaction_status: "Success" | "Failed";
       year: any;
     };
+    const senderwallet = await WalletRepository.getwalletByUserId(userId);
+    if (!senderwallet)
+      throw throwCustomError("Account number does not exist", 404);
     try {
       // Logic to debit the account (with transaction)
-      const senderwallet = await WalletRepository.getwalletByUserId(userId);
-      if (!senderwallet)
-        throw throwCustomError("Account number does not exist", 404);
 
       const { error } = transferValidator.validate(data);
       if (error) throw throwCustomError(error.message, 422);
@@ -248,44 +250,42 @@ export class WalletService {
       };
     } catch (error: any) {
       await session.abortTransaction();
+      
+      // //=====================||SENDER NOTIFICATION FAILURE ||================
+      const tx_ref3 = `Ref-${Date.now()}3`;
+      
+      const transaction3 =
+      await WalletRepository.createWalletTransactionHistory(
+        {
+          walletId: senderwallet._id,
+          sendersAccount: senderwallet.account_number,
+          recieversAccount: data.accountNumber,
+          tx_ref: tx_ref3,
+          amount: data.amount,
+          type: "DEBIT",
+          status: "FAILED",
+          userId: senderwallet._id,
+        },
+        session
+      );
+      sendMail(
+        {
+          email: (senderwallet.user_id as any).email,
+          subject: "Transaction Notification",
+          emailInfo: {
+            name: `${(senderwallet.user_id as any).last_name} ${(senderwallet.user_id as any).first_name}`,
+            transaction_id: tx_ref3,
+            transaction_amount: data.amount,
+            transaction_date: new Date(transaction3.createdAt).toISOString(),
+            payment_method: "TRANSFER",
+            transaction_status: "Failed",
+            year: new Date().getFullYear(),
+          },
+          
+        },
+        generateTransactionEmail
+      );
       session.endSession();
-      // sendMail(
-      //   {
-      //     email: isValid.email,
-      //     subject: "Transaction Notification",
-      //     emailInfo: {
-      //       name: isValid.Accountname,
-      //       transaction_id: tx_ref2,
-      //       transaction_amount: data.amount,
-      //       transaction_date: new Date(transaction2.createdAt).toISOString(),
-      //       payment_method: "TRANSFER",
-      //       transaction_status: "success",
-      //       year: new Date().getFullYear(),
-      //     },
-      //   },
-      //   generateTransactionEmail
-      // );
-
-      // //=====================||SENDER NOTIFICATION ||================
-      // sendMail(
-      //   {
-      //     email: (senderwallet.user_id as any).email,
-      //     subject: "Transaction Notification",
-      //     emailInfo: {
-      //       name: `${(senderwallet.user_id as any).last_name} ${
-      //         (senderwallet.user_id as any).first_name
-      //       }`,
-
-      //       transaction_id: tx_ref,
-      //       transaction_amount: data.amount,
-      //       transaction_date: new Date(transaction1.createdAt).toISOString(),
-      //       payment_method: "TRANSFER",
-      //       transaction_status: "success",
-      //       year: new Date().getFullYear(),
-      //     },
-      //   },
-      //   generateTransactionEmail
-      // );
       throw throwCustomError(error.message || "Transaction failed", 500);
     } finally {
     }
