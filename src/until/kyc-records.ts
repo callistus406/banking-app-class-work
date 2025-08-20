@@ -1,7 +1,7 @@
 export const kycRecords = [
   {
-    "first_name": "cain",
-    "last_name": "abel",
+    "first_name": "dream",
+    "last_name": "come",
     "dateOfBirth": "1990-06-15",
     "gender": "Female",
     "nin": "12345678901",
